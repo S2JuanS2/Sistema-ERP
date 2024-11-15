@@ -1,18 +1,18 @@
 package fi.uba.memo1.apirest.finanzas.steps;
 
+import fi.uba.memo1.apirest.finanzas.CucumberSpringConfiguration;
+import io.cucumber.spring.CucumberContextConfiguration;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-public class MyStepdefs {
+@CucumberContextConfiguration
+public class MyStepdefs extends CucumberSpringConfiguration {
     private String route;
     private ResponseEntity<String> response;
 
@@ -23,8 +23,7 @@ public class MyStepdefs {
 
     @When("I send a GET request")
     public void iSendAGETRequest() {
-        RestTemplate restTemplate = new RestTemplate();
-        response = restTemplate.getForEntity(route, String.class);
+        response = testRestTemplate.getForEntity(route, String.class);
     }
 
     @Then("the response status code should be {int}")
