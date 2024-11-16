@@ -35,7 +35,7 @@ public class FinanzasService implements IFinanzasService {
     }
 
     @Override
-    public Mono<List<Project>> getProjects() {
+    public Mono<List<Project>> getProjectsTest() {
         return proyectosWebClient
                 .get()
                 .uri("/proyectos")
@@ -45,7 +45,7 @@ public class FinanzasService implements IFinanzasService {
         }
 
     @Override
-    public Mono<List<Test>> getTasksWithDetails() {
+    public Mono<List<Test>> getTasksWithDetailsTest() {
         // Obtener los datos de las tres APIs
         Mono<List<Task>> tareasMono = tareasWebClient
                 .get()

@@ -17,18 +17,18 @@ public class FinanzasController {
         this.finanzasService = finanzasService;
     }
 
-    @GetMapping("/hola-mundo")
+    @GetMapping("/hola-mundo") // TODO: endpoint para probar el servicio
     public ResponseEntity<?> holaMundo() {
         return ResponseEntity.status(HttpStatus.OK).body(finanzasService.getHelloWorld());
     }
 
-    @GetMapping("/proyectos")
+    @GetMapping("/test-proyectos") // TODO: endpoint para probar la API
     public ResponseEntity<?> getProjects() {
-        return ResponseEntity.status(HttpStatus.OK).body(finanzasService.getProjects());
+        return ResponseEntity.status(HttpStatus.OK).body(finanzasService.getProjectsTest());
     }
 
-    @GetMapping("/test")
+    @GetMapping("/test-composicion")  // TODO: endpoint para probar la composicion de las APIs
     public ResponseEntity<?> getTasksWithDetails() {
-        return ResponseEntity.status(HttpStatus.OK).body(finanzasService.getTasksWithDetails());
+        return ResponseEntity.status(HttpStatus.OK).body(finanzasService.getTasksWithDetailsTest());
     }
 }

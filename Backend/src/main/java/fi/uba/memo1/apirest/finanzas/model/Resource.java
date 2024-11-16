@@ -6,15 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.UUID;
-
-/*
-"id": "ff14a491-e26d-4092-86ea-d76f20c165d1",
-"nombre": "Martin",
-"apellido": "Garcia",
-"dni": "33834234",
-"rolId": "1f14a491-e26d-4092-86ea-d76f20c165d1"
- */
 
 @AllArgsConstructor
 @NoArgsConstructor

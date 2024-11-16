@@ -13,7 +13,6 @@ import java.io.Serializable;
 @Getter
 @Setter
 public class Project implements Serializable {
-
     private String id;
     private String nombre;
     private String descripcion;

@@ -12,17 +12,9 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Test implements Serializable {
-
-
     private String id;
-
     private String nombre;
-
     private String descripcion;
-
     private Resource recurso;
-
     private Project proyecto;
-
-
 }

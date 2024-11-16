@@ -11,7 +11,7 @@ public interface IFinanzasService {
 
     String getHelloWorld(); // TODO: prueba
 
-    Mono<List<Project>> getProjects(); // TODO: prueba api
+    Mono<List<Project>> getProjectsTest(); // TODO: prueba api
 
-    Mono<List<Test>> getTasksWithDetails();
+    Mono<List<Test>> getTasksWithDetailsTest(); // TODO: prueba api composicion
 }
