@@ -41,13 +41,7 @@ public class FinanzasService implements IFinanzasService {
                 .uri("/proyectos")
                 .retrieve()
                 .bodyToFlux(Project.class)
-                .collectList()
-                .map(projects -> {
-                    projects.forEach(project -> {
-                        project.setNombre(project.getNombre() + " - " + project.getId());
-                    });
-                    return projects;
-                });
+                .collectList();
         }
 
     @Override
@@ -85,10 +79,10 @@ public class FinanzasService implements IFinanzasService {
                     return tareas.stream().map(tarea -> {
                         Test response = new Test();
 
+                        response.setId(tarea.getId());
                         response.setNombre(tarea.getNombre());
                         response.setDescripcion(tarea.getDescripcion());
 
-                        // Encontrar el recurso correspondiente
                         response.setRecurso(
                                 recursos.stream()
                                         .filter(recurso -> recurso.getId().equals(tarea.getRecursoId()))
@@ -96,7 +90,6 @@ public class FinanzasService implements IFinanzasService {
                                         .orElse(null)
                         );
 
-                        // Encontrar el proyecto correspondiente
                         response.setProyecto(
                                 proyectos.stream()
                                         .filter(proyecto -> proyecto.getId().equals(tarea.getProyectoId()))
