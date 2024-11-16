@@ -1,21 +1,39 @@
 package fi.uba.memo1.apirest.finanzas.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
+
+import java.io.Serializable;
+import java.util.UUID;
 
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "test")
-public class Test extends Base {
+public class Test implements Serializable {
 
-    @Column(name = "name", nullable = false)
-    private String namePlan;
+    @Id
+    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
+
+    @Column(name = "nombre", nullable = false)
+    private String nombre;
+
+    @Column(name = "descripcion", nullable = false)
+    private String descripcion;
+
+    @Column(name = "recurso", nullable = false)
+    private Resource recurso;
+
+    @Column(name = "proyecto", nullable = false)
+    private Project proyecto;
+
+
 }

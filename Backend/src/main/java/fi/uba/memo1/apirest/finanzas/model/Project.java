@@ -5,13 +5,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serializable;
+
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class Project {
+public class Project implements Serializable {
 
-    private Integer id;
+    private String id;
     private String nombre;
     private String descripcion;
 }
