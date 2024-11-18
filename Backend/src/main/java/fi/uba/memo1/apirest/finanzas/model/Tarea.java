@@ -11,7 +11,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Task implements Serializable {
+public class Tarea implements Serializable {
     private String id;
     private String nombre;
     private String descripcion;

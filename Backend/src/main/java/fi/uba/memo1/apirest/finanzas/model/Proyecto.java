@@ -7,14 +7,13 @@ import lombok.Setter;
 
 import java.io.Serializable;
 
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class Resource implements Serializable {
+public class Proyecto implements Serializable {
     private String id;
     private String nombre;
-    private String apellido;
-    private String dni;
-    private String rolId;
+    private String descripcion;
 }

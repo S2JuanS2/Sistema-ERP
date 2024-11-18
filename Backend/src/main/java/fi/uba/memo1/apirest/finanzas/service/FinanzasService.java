@@ -1,10 +1,9 @@
 package fi.uba.memo1.apirest.finanzas.service;
 
 
-import fi.uba.memo1.apirest.finanzas.model.Project;
-import fi.uba.memo1.apirest.finanzas.model.Resource;
-import fi.uba.memo1.apirest.finanzas.model.Task;
-import fi.uba.memo1.apirest.finanzas.model.Test;
+import fi.uba.memo1.apirest.finanzas.model.Proyecto;
+import fi.uba.memo1.apirest.finanzas.model.Recurso;
+import fi.uba.memo1.apirest.finanzas.model.Tarea;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -29,51 +28,38 @@ public class FinanzasService implements IFinanzasService {
     private WebClient tareasWebClient;
 
 
-    @Override
-    public String getHelloWorld() {
-        return "Hola mundo";
-    }
 
-    @Override
-    public Mono<List<Project>> getProjectsTest() {
-        return proyectosWebClient
-                .get()
-                .uri("/proyectos")
-                .retrieve()
-                .bodyToFlux(Project.class)
-                .collectList();
-        }
-
+        /*
     @Override
     public Mono<List<Test>> getTasksWithDetailsTest() {
         // Obtener los datos de las tres APIs
-        Mono<List<Task>> tareasMono = tareasWebClient
+        Mono<List<Tarea>> tareasMono = tareasWebClient
                 .get()
                 .uri("/tareas")
                 .retrieve()
-                .bodyToFlux(Task.class)
+                .bodyToFlux(Tarea.class)
                 .collectList();
 
-        Mono<List<Resource>> recursosMono = recursosWebClient
+        Mono<List<Recurso>> recursosMono = recursosWebClient
                 .get()
                 .uri("/recursos")
                 .retrieve()
-                .bodyToFlux(Resource.class)
+                .bodyToFlux(Recurso.class)
                 .collectList();
 
-        Mono<List<Project>> proyectosMono = proyectosWebClient
+        Mono<List<Proyecto>> proyectosMono = proyectosWebClient
                 .get()
                 .uri("/proyectos")
                 .retrieve()
-                .bodyToFlux(Project.class)
+                .bodyToFlux(Proyecto.class)
                 .collectList();
 
         // Combinar los datos
         return Mono.zip(tareasMono, recursosMono, proyectosMono)
                 .map(tuple -> {
-                    List<Task> tareas = tuple.getT1();
-                    List<Resource> recursos = tuple.getT2();
-                    List<Project> proyectos = tuple.getT3();
+                    List<Tarea> tareas = tuple.getT1();
+                    List<Recurso> recursos = tuple.getT2();
+                    List<Proyecto> proyectos = tuple.getT3();
 
                     // Mapear las tareas con los detalles combinados
                     return tareas.stream().map(tarea -> {
@@ -101,5 +87,7 @@ public class FinanzasService implements IFinanzasService {
                     }).toList();
                 });
     }
+
+         */
 
 }
