@@ -6,13 +6,14 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class CargarCostosSteps {
     private String name;
     private double cost;
@@ -21,7 +22,6 @@ public class CargarCostosSteps {
 
     @Autowired
     private TestRestTemplate restTemplate;
-
 
     @And("a role experience {string}")
     public void aRoleExperience(String experience) {
