@@ -17,111 +17,111 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class FinanzasApplicationTests {
-	private final String CARGAR_COSTOS_URL = "/api/v1/finanzas/cargar-costo";
-	private static final String COSTOS_URL = "/api/v1/finanzas/costos";
-	private WebClient webClient;
+    private static final String COSTOS_URL = "/api/v1/finanzas/costos";
+    private final String CARGAR_COSTOS_URL = "/api/v1/finanzas/cargar-costo";
+    private WebClient webClient;
 
-	@LocalServerPort
-	private int port;
-
-
-	@BeforeEach
-	void init(){
-		this.webClient = WebClient.builder().baseUrl("http://localhost:" + port).build();
-	}
-
-	@Test
-	void cargarCostoExitosamente(){
-		CargarCostoRequest request = new CargarCostoRequest();
-		request.setCosto(1000);
-		request.setNombre("Desarrollador");
-		request.setExperiencia("Senior");
-
-		Mono<String> response = webClient.post()
-				.uri(CARGAR_COSTOS_URL)
-				.body(Mono.just(request), CargarCostoRequest.class)
-				.retrieve()
-				.bodyToMono(String.class);
-
-		String res = response.block();
-		assertTrue(Objects.requireNonNull(res).startsWith("Se cargo el costo con ID:"));
-	}
-
-	@Test
-	void noSePuedeCargarCostoConNombreInexistente(){
-		CargarCostoRequest request = new CargarCostoRequest();
-		request.setCosto(1000);
-		request.setNombre("Administrador");
-		request.setExperiencia("Senior");
-
-		WebClientResponseException exception = assertThrows(WebClientResponseException.class, () -> {
-			Mono<String> response = webClient.post()
-					.uri(CARGAR_COSTOS_URL)
-					.body(Mono.just(request), CargarCostoRequest.class)
-					.retrieve()
-					.bodyToMono(String.class);
-
-			response.block();
-		});
-
-		assertEquals(404, exception.getStatusCode().value());
-		assertEquals("Rol no encontrado", exception.getResponseBodyAsString());
-	}
+    @LocalServerPort
+    private int port;
 
 
-	@Test
-	void noSePuedeCargarCostoConExperienciaInexistente(){
-		CargarCostoRequest request = new CargarCostoRequest();
-		request.setCosto(1000);
-		request.setNombre("Desarrollador");
-		request.setExperiencia("Entry");
+    @BeforeEach
+    void init() {
+        this.webClient = WebClient.builder().baseUrl("http://localhost:" + port).build();
+    }
 
-		WebClientResponseException exception = assertThrows(WebClientResponseException.class, () -> {
-			Mono<String> response = webClient.post()
-					.uri(CARGAR_COSTOS_URL)
-					.body(Mono.just(request), CargarCostoRequest.class)
-					.retrieve()
-					.bodyToMono(String.class);
+    @Test
+    void cargarCostoExitosamente() {
+        CargarCostoRequest request = new CargarCostoRequest();
+        request.setCosto(1000);
+        request.setNombre("Desarrollador");
+        request.setExperiencia("Senior");
 
-			response.block();
-		});
+        Mono<String> response = webClient.post()
+                .uri(CARGAR_COSTOS_URL)
+                .body(Mono.just(request), CargarCostoRequest.class)
+                .retrieve()
+                .bodyToMono(String.class);
 
-		assertEquals(404, exception.getStatusCode().value());
-		assertEquals("Rol no encontrado", exception.getResponseBodyAsString());
-	}
+        String res = response.block();
+        assertTrue(Objects.requireNonNull(res).startsWith("Se cargo el costo con ID:"));
+    }
 
-	@Test
-	void seAgregaElCostoALaTablaCorrectamente() {
-		Mono<List<CostosMensuales>> response = webClient.get()
-				.uri(COSTOS_URL)
-				.retrieve()
-				.bodyToFlux(CostosMensuales.class)
-				.collectList();
+    @Test
+    void noSePuedeCargarCostoConNombreInexistente() {
+        CargarCostoRequest request = new CargarCostoRequest();
+        request.setCosto(1000);
+        request.setNombre("Administrador");
+        request.setExperiencia("Senior");
 
-		List<CostosMensuales> costos = response.block();
-		int count = Objects.requireNonNull(costos).size();
+        WebClientResponseException exception = assertThrows(WebClientResponseException.class, () -> {
+            Mono<String> response = webClient.post()
+                    .uri(CARGAR_COSTOS_URL)
+                    .body(Mono.just(request), CargarCostoRequest.class)
+                    .retrieve()
+                    .bodyToMono(String.class);
 
-		CargarCostoRequest request = new CargarCostoRequest();
-		request.setCosto(1000);
-		request.setNombre("Desarrollador");
-		request.setExperiencia("Senior");
+            response.block();
+        });
 
-		Mono<String> response2 = webClient.post()
-				.uri(CARGAR_COSTOS_URL)
-				.body(Mono.just(request), CargarCostoRequest.class)
-				.retrieve()
-				.bodyToMono(String.class);
+        assertEquals(404, exception.getStatusCode().value());
+        assertEquals("Rol no encontrado", exception.getResponseBodyAsString());
+    }
 
-		response2.block();
 
-		Mono<List<CostosMensuales>> response3 = webClient.get()
-				.uri(COSTOS_URL)
-				.retrieve()
-				.bodyToFlux(CostosMensuales.class)
-				.collectList();
+    @Test
+    void noSePuedeCargarCostoConExperienciaInexistente() {
+        CargarCostoRequest request = new CargarCostoRequest();
+        request.setCosto(1000);
+        request.setNombre("Desarrollador");
+        request.setExperiencia("Entry");
 
-		List<CostosMensuales> costos2 = response3.block();
+        WebClientResponseException exception = assertThrows(WebClientResponseException.class, () -> {
+            Mono<String> response = webClient.post()
+                    .uri(CARGAR_COSTOS_URL)
+                    .body(Mono.just(request), CargarCostoRequest.class)
+                    .retrieve()
+                    .bodyToMono(String.class);
 
-		assertEquals(count + 1, Objects.requireNonNull(costos2).size());
-	}
+            response.block();
+        });
+
+        assertEquals(404, exception.getStatusCode().value());
+        assertEquals("Rol no encontrado", exception.getResponseBodyAsString());
+    }
+
+    @Test
+    void seAgregaElCostoALaTablaCorrectamente() {
+        Mono<List<CostosMensuales>> response = webClient.get()
+                .uri(COSTOS_URL)
+                .retrieve()
+                .bodyToFlux(CostosMensuales.class)
+                .collectList();
+
+        List<CostosMensuales> costos = response.block();
+        int count = Objects.requireNonNull(costos).size();
+
+        CargarCostoRequest request = new CargarCostoRequest();
+        request.setCosto(1000);
+        request.setNombre("Desarrollador");
+        request.setExperiencia("Senior");
+
+        Mono<String> response2 = webClient.post()
+                .uri(CARGAR_COSTOS_URL)
+                .body(Mono.just(request), CargarCostoRequest.class)
+                .retrieve()
+                .bodyToMono(String.class);
+
+        response2.block();
+
+        Mono<List<CostosMensuales>> response3 = webClient.get()
+                .uri(COSTOS_URL)
+                .retrieve()
+                .bodyToFlux(CostosMensuales.class)
+                .collectList();
+
+        List<CostosMensuales> costos2 = response3.block();
+
+        assertEquals(count + 1, Objects.requireNonNull(costos2).size());
+    }
 }

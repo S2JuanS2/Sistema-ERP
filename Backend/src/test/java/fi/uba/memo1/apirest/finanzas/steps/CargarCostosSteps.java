@@ -32,7 +32,7 @@ public class CargarCostosSteps {
     private int port;
 
     @Before
-    public void init(){
+    public void init() {
         this.webClient = WebClient.builder().baseUrl("http://localhost:" + port).build();
     }
 
@@ -75,7 +75,7 @@ public class CargarCostosSteps {
 
     @Then("the status code should be {int}")
     public void theStatusCodeShouldBe(int statusCode) {
-        if(this.exception != null){
+        if (this.exception != null) {
             assertEquals(statusCode, this.exception.getStatusCode().value());
             return;
         }
@@ -85,7 +85,7 @@ public class CargarCostosSteps {
 
     @And("the response should be {string}")
     public void theResponseShouldBe(String text) {
-        if(this.exception != null){
+        if (this.exception != null) {
             assertEquals(text, this.exception.getResponseBodyAsString());
             return;
         }
