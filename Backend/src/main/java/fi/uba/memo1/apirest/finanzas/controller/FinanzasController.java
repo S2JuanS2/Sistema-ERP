@@ -1,31 +1,27 @@
 package fi.uba.memo1.apirest.finanzas.controller;
 
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import fi.uba.memo1.apirest.finanzas.dto.CargarCostoRequest;
+import fi.uba.memo1.apirest.finanzas.dto.Rol;
 import fi.uba.memo1.apirest.finanzas.model.CostosMensuales;
 import fi.uba.memo1.apirest.finanzas.service.CostosMensualesService;
+import fi.uba.memo1.apirest.finanzas.service.FinanzasService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
-import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "*")
 @RequestMapping(path = "/api/v1/finanzas")
 public class FinanzasController {
-
-    private static final String ROLES_URL = "https://anypoint.mulesoft.com/mocking/api/v1/sources/exchange/assets/32c8fe38-22a6-4fbb-b461-170dfac937e4/roles-api/1.0.0/m/roles";
     private final CostosMensualesService service;
+    private final FinanzasService finanzasService;
 
-    public FinanzasController(CostosMensualesService service) {
+    public FinanzasController(CostosMensualesService service, FinanzasService finanzasService) {
         this.service = service;
+        this.finanzasService = finanzasService;
     }
 
     @GetMapping("/costos")
@@ -43,43 +39,32 @@ public class FinanzasController {
     }
 
     @PostMapping("/cargar-costo")
-    public ResponseEntity<?> cargarCosto(@RequestBody CargarCostoRequest request) {
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<Map[]> res = restTemplate.getForEntity(ROLES_URL, Map[].class);
+    public Mono<ResponseEntity<String>> cargarCosto(@RequestBody CargarCostoRequest request) {
+        return finanzasService.getRoles()
+                .flatMap(roles -> {
+                    String idFound = null;
+                    for (Rol rol : roles) {
+                        if (rol.getNombre().equalsIgnoreCase(request.getNombre()) && rol.getExperiencia().equalsIgnoreCase(request.getExperiencia())) {
+                            idFound = rol.getId();
+                            break;
+                        }
+                    }
 
-        if(res.getStatusCode() != HttpStatus.OK) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al obtener los roles");
-        }
+                    if (idFound == null) {
+                        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Rol no encontrado"));
+                    }
 
-        Map[] roles = res.getBody();
-        if (roles == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al obtener los roles");
-        }
+                    LocalDate current = LocalDate.now();
 
-        String rolID = null;
-        for (Map rol : roles) {
-            if (request.getNombre().equalsIgnoreCase(rol.get("nombre").toString()) && request.getExperiencia().equalsIgnoreCase(rol.get("experiencia").toString())) {
-                rolID = rol.get("id").toString();
-                break;
-            }
-        }
+                    CostosMensuales costos = new CostosMensuales();
+                    costos.setIdRol(idFound);
+                    costos.setCosto(request.getCosto());
+                    costos.setMes(String.valueOf(current.getMonthValue()));
+                    costos.setAnio(String.valueOf(current.getYear()));
 
-        if (rolID == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Rol no encontrado");
-        }
-
-        LocalDate currentDate = LocalDate.now();
-        int mes = currentDate.getMonthValue();
-        int anio = currentDate.getYear();
-
-        CostosMensuales costoMensual = new CostosMensuales();
-        costoMensual.setId_rol(rolID);
-        costoMensual.setMes(String.valueOf(mes));
-        costoMensual.setAnio(String.valueOf(anio));
-        costoMensual.setCosto(request.getCosto());
-
-        service.save(costoMensual);
-
-        return ResponseEntity.status(HttpStatus.OK).body("Costo cargado correctamente");
+                    CostosMensuales savedCosto = service.save(costos);
+                    return Mono.just(ResponseEntity.status(HttpStatus.CREATED).body("Se cargo el costo con ID:" + savedCosto.getId()));
+                })
+                .onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al obtener los roles")));
     }
 }

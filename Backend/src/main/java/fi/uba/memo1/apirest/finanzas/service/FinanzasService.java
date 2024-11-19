@@ -1,9 +1,7 @@
 package fi.uba.memo1.apirest.finanzas.service;
 
 
-import fi.uba.memo1.apirest.finanzas.model.Proyecto;
-import fi.uba.memo1.apirest.finanzas.model.Recurso;
-import fi.uba.memo1.apirest.finanzas.model.Tarea;
+import fi.uba.memo1.apirest.finanzas.dto.Rol;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -27,9 +25,20 @@ public class FinanzasService implements IFinanzasService {
     @Qualifier("tareasWebClient")
     private WebClient tareasWebClient;
 
+    @Autowired
+    @Qualifier("rolesWebClient")
+    private WebClient rolesWebClient;
 
+    public Mono<List<Rol>> getRoles() {
+        return rolesWebClient
+                .get()
+                .uri("/roles")
+                .retrieve()
+                .bodyToFlux(Rol.class)
+                .collectList();
+    }
 
-        /*
+            /*
     @Override
     public Mono<List<Test>> getTasksWithDetailsTest() {
         // Obtener los datos de las tres APIs
@@ -89,5 +98,4 @@ public class FinanzasService implements IFinanzasService {
     }
 
          */
-
 }

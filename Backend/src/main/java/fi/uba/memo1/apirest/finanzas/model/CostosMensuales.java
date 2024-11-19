@@ -15,7 +15,7 @@ public class CostosMensuales {
 
     @Setter
     @Column(nullable = false)
-    private String id_rol;
+    private String idRol;
 
     @Setter
     @Column(nullable = false)

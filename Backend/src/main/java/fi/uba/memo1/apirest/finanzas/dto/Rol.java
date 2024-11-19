@@ -1,4 +1,4 @@
-package fi.uba.memo1.apirest.finanzas.model;
+package fi.uba.memo1.apirest.finanzas.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,10 +11,8 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Tarea implements Serializable {
+public class Rol implements Serializable {
     private String id;
     private String nombre;
-    private String descripcion;
-    private String recursoId;
-    private String proyectoId;
+    private String experiencia;
 }
