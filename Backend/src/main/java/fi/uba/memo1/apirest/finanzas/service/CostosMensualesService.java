@@ -3,6 +3,7 @@ package fi.uba.memo1.apirest.finanzas.service;
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesRequest;
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesResponse;
 import fi.uba.memo1.apirest.finanzas.dto.Rol;
+import fi.uba.memo1.apirest.finanzas.exception.RolNoEncontradoException;
 import fi.uba.memo1.apirest.finanzas.model.CostosMensuales;
 import fi.uba.memo1.apirest.finanzas.repository.CostosMensualesRepository;
 import jakarta.transaction.Transactional;
@@ -54,12 +55,11 @@ public class CostosMensualesService implements ICostosMensualesService{
         Mono<Rol> matchingRolMono = rolesMono.flatMap(roles ->
                 Mono.justOrEmpty(
                         roles.stream()
-                                .filter(rol ->
-                                        costos.getNombre().equalsIgnoreCase(rol.getNombre()) &&
-                                                costos.getExperiencia().equalsIgnoreCase(rol.getExperiencia()))
+                                .filter(rol -> costos.getNombre().equalsIgnoreCase(rol.getNombre()) && costos.getExperiencia().equalsIgnoreCase(rol.getExperiencia()))
                                 .findFirst()
                 )
-        );
+        ).switchIfEmpty(Mono.error(new RolNoEncontradoException()));
+
         // Procesar el rol encontrado o manejar si no se encuentra
         return matchingRolMono.flatMap(matchingRol -> {
             LocalDate currentDate = LocalDate.now();

@@ -33,6 +33,6 @@ public class CostosMensualesController {
 
     @PostMapping("/cargar-costo")
     public ResponseEntity<?> cargarCosto(@RequestBody CostosMensualesRequest costosMensualesRequest) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.save(costosMensualesRequest));
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.save(costosMensualesRequest));
     }
 }
