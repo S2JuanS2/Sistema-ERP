@@ -23,8 +23,11 @@ public class CostosMensualesService implements ICostosMensualesService{
     @Qualifier("rolesWebClient")
     private WebClient rolesWebClient;
 
-    @Autowired
-    private CostosMensualesRepository repository;
+    private final CostosMensualesRepository repository;
+
+    public CostosMensualesService(CostosMensualesRepository repository) {
+        this.repository = repository;
+    }
 
     @Override
     public List<CostosMensuales> findAll() {
