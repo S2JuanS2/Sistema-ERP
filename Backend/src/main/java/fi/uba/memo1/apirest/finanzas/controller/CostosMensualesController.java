@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+
 @RestController
 @CrossOrigin(origins = "*")
 @RequestMapping(path = "/api/v1/finanzas")
@@ -23,12 +25,8 @@ public class CostosMensualesController {
     }
 
     @GetMapping("/costos/{id}")
-    public ResponseEntity<?> getCostos(@PathVariable String id) {
-        CostosMensuales costos = service.findById(id);
-        if (costos == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Costo no encontrado");
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(costos);
+    public ResponseEntity<?> getCostos(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(service.findById(id));
     }
 
     @PostMapping("/cargar-costo")

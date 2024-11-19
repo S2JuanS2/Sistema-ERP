@@ -3,6 +3,7 @@ package fi.uba.memo1.apirest.finanzas.service;
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesRequest;
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesResponse;
 import fi.uba.memo1.apirest.finanzas.dto.Rol;
+import fi.uba.memo1.apirest.finanzas.exception.CostoMensualNoEncontradoException;
 import fi.uba.memo1.apirest.finanzas.exception.RolNoEncontradoException;
 import fi.uba.memo1.apirest.finanzas.model.CostosMensuales;
 import fi.uba.memo1.apirest.finanzas.repository.CostosMensualesRepository;
@@ -36,8 +37,8 @@ public class CostosMensualesService implements ICostosMensualesService{
     }
 
     @Override
-    public CostosMensuales findById(String id) {
-        return repository.findById(Long.parseLong(id)).orElse(null);
+    public CostosMensuales findById(Long id) {
+        return repository.findById(id).orElseThrow(() -> new CostoMensualNoEncontradoException());
     }
 
 

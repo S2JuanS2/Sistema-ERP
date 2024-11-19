@@ -11,7 +11,7 @@ import java.util.List;
 public interface ICostosMensualesService {
     List<CostosMensuales> findAll();
 
-    CostosMensuales findById(String id);
+    CostosMensuales findById(Long id);
 
     @Transactional
     Mono<CostosMensualesResponse> save(CostosMensualesRequest costos);
