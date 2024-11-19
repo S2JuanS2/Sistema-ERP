@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter
+@Setter
 @Entity
 @Table
 public class CostosMensuales {
@@ -13,19 +14,15 @@ public class CostosMensuales {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Setter
     @Column(nullable = false)
     private String idRol;
 
-    @Setter
     @Column(nullable = false)
     private String mes;
 
-    @Setter
     @Column(nullable = false)
     private String anio;
 
-    @Setter
     @Column(nullable = false)
     private Double costo;
 }
