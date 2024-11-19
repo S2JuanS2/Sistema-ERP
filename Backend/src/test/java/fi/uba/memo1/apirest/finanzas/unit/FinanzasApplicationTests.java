@@ -1,6 +1,6 @@
 package fi.uba.memo1.apirest.finanzas.unit;
 
-import fi.uba.memo1.apirest.finanzas.dto.CargarCostoRequest;
+import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesRequest;
 import fi.uba.memo1.apirest.finanzas.model.CostosMensuales;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,14 +32,14 @@ class FinanzasApplicationTests {
 
     @Test
     void cargarCostoExitosamente() {
-        CargarCostoRequest request = new CargarCostoRequest();
+        CostosMensualesRequest request = new CostosMensualesRequest();
         request.setCosto(1000);
         request.setNombre("Desarrollador");
         request.setExperiencia("Senior");
 
         Mono<String> response = webClient.post()
                 .uri(CARGAR_COSTOS_URL)
-                .body(Mono.just(request), CargarCostoRequest.class)
+                .body(Mono.just(request), CostosMensualesRequest.class)
                 .retrieve()
                 .bodyToMono(String.class);
 
@@ -49,7 +49,7 @@ class FinanzasApplicationTests {
 
     @Test
     void noSePuedeCargarCostoConNombreInexistente() {
-        CargarCostoRequest request = new CargarCostoRequest();
+        CostosMensualesRequest request = new CostosMensualesRequest();
         request.setCosto(1000);
         request.setNombre("Administrador");
         request.setExperiencia("Senior");
@@ -57,7 +57,7 @@ class FinanzasApplicationTests {
         WebClientResponseException exception = assertThrows(WebClientResponseException.class, () -> {
             Mono<String> response = webClient.post()
                     .uri(CARGAR_COSTOS_URL)
-                    .body(Mono.just(request), CargarCostoRequest.class)
+                    .body(Mono.just(request), CostosMensualesRequest.class)
                     .retrieve()
                     .bodyToMono(String.class);
 
@@ -71,7 +71,7 @@ class FinanzasApplicationTests {
 
     @Test
     void noSePuedeCargarCostoConExperienciaInexistente() {
-        CargarCostoRequest request = new CargarCostoRequest();
+        CostosMensualesRequest request = new CostosMensualesRequest();
         request.setCosto(1000);
         request.setNombre("Desarrollador");
         request.setExperiencia("Entry");
@@ -79,7 +79,7 @@ class FinanzasApplicationTests {
         WebClientResponseException exception = assertThrows(WebClientResponseException.class, () -> {
             Mono<String> response = webClient.post()
                     .uri(CARGAR_COSTOS_URL)
-                    .body(Mono.just(request), CargarCostoRequest.class)
+                    .body(Mono.just(request), CostosMensualesRequest.class)
                     .retrieve()
                     .bodyToMono(String.class);
 
@@ -101,14 +101,14 @@ class FinanzasApplicationTests {
         List<CostosMensuales> costos = response.block();
         int count = Objects.requireNonNull(costos).size();
 
-        CargarCostoRequest request = new CargarCostoRequest();
+        CostosMensualesRequest request = new CostosMensualesRequest();
         request.setCosto(1000);
         request.setNombre("Desarrollador");
         request.setExperiencia("Senior");
 
         Mono<String> response2 = webClient.post()
                 .uri(CARGAR_COSTOS_URL)
-                .body(Mono.just(request), CargarCostoRequest.class)
+                .body(Mono.just(request), CostosMensualesRequest.class)
                 .retrieve()
                 .bodyToMono(String.class);
 

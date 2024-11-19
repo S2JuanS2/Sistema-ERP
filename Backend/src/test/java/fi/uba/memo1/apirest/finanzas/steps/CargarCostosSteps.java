@@ -1,6 +1,6 @@
 package fi.uba.memo1.apirest.finanzas.steps;
 
-import fi.uba.memo1.apirest.finanzas.dto.CargarCostoRequest;
+import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesRequest;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -49,7 +49,7 @@ public class CargarCostosSteps {
 
     @When("I POST to the route {string}")
     public void iPOSTToTheRoute(String route) {
-        CargarCostoRequest request = new CargarCostoRequest();
+        CostosMensualesRequest request = new CostosMensualesRequest();
         request.setNombre(name);
         request.setExperiencia(experience);
         request.setCosto(cost);
@@ -57,7 +57,7 @@ public class CargarCostosSteps {
         try {
             Mono<ResponseEntity<String>> res = webClient.post()
                     .uri(route)
-                    .body(Mono.just(request), CargarCostoRequest.class)
+                    .body(Mono.just(request), CostosMensualesRequest.class)
                     .retrieve()
                     .toEntity(String.class);
 
