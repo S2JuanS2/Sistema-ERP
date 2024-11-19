@@ -19,7 +19,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
-public class CostosMensualesService implements ICostosMensualesService{
+public class CostosMensualesService implements ICostosMensualesService {
 
     @Autowired
     @Qualifier("rolesWebClient")
@@ -83,4 +83,5 @@ public class CostosMensualesService implements ICostosMensualesService{
                             )
                     );
         });
-    }}
+    }
+}

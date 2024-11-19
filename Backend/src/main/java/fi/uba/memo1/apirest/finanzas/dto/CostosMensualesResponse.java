@@ -5,14 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
 import java.io.Serializable;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class CostosMensualesResponse implements Serializable{
+public class CostosMensualesResponse implements Serializable {
     private Long id;
     private String idRol;
     private String mes;

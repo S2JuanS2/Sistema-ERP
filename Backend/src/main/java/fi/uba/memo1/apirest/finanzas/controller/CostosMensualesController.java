@@ -1,13 +1,10 @@
 package fi.uba.memo1.apirest.finanzas.controller;
 
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesRequest;
-import fi.uba.memo1.apirest.finanzas.model.CostosMensuales;
 import fi.uba.memo1.apirest.finanzas.service.CostosMensualesService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
 
 @RestController
 @CrossOrigin(origins = "*")
