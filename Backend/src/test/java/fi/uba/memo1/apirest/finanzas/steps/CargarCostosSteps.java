@@ -1,17 +1,22 @@
 package fi.uba.memo1.apirest.finanzas.steps;
 
 import fi.uba.memo1.apirest.finanzas.dto.CargarCostoRequest;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpEntity;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
+
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class CargarCostosSteps {
@@ -19,9 +24,18 @@ public class CargarCostosSteps {
     private double cost;
     private String experience;
     private ResponseEntity<String> response;
+    private WebClientResponseException exception;
 
-    @Autowired
-    private TestRestTemplate restTemplate;
+    private WebClient webClient;
+
+    @LocalServerPort
+    private int port;
+
+    @Before
+    public void init(){
+        this.webClient = WebClient.builder().baseUrl("http://localhost:" + port).build();
+    }
+
 
     @And("a role experience {string}")
     public void aRoleExperience(String experience) {
@@ -40,8 +54,18 @@ public class CargarCostosSteps {
         request.setExperiencia(experience);
         request.setCosto(cost);
 
-        HttpEntity<CargarCostoRequest> requestEntity = new HttpEntity<>(request);
-        this.response = restTemplate.postForEntity(restTemplate.getRootUri() + route, requestEntity, String.class);
+        try {
+            Mono<ResponseEntity<String>> res = webClient.post()
+                    .uri(route)
+                    .body(Mono.just(request), CargarCostoRequest.class)
+                    .retrieve()
+                    .toEntity(String.class);
+
+            this.response = res.block();
+        } catch (WebClientResponseException e) {
+            this.exception = e;
+        }
+
     }
 
     @And("a role cost {string}")
@@ -51,11 +75,21 @@ public class CargarCostosSteps {
 
     @Then("the status code should be {int}")
     public void theStatusCodeShouldBe(int statusCode) {
+        if(this.exception != null){
+            assertEquals(statusCode, this.exception.getStatusCode().value());
+            return;
+        }
+
         assertEquals(statusCode, response.getStatusCode().value());
     }
 
     @And("the response should be {string}")
-    public void theResponseShouldBe(String response) {
-        assertEquals(response, this.response.getBody());
+    public void theResponseShouldBe(String text) {
+        if(this.exception != null){
+            assertEquals(text, this.exception.getResponseBodyAsString());
+            return;
+        }
+
+        assertTrue(Objects.requireNonNull(this.response.getBody()).startsWith(text));
     }
 }

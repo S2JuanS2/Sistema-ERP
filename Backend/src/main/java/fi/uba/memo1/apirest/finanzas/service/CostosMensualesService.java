@@ -21,7 +21,7 @@ public class CostosMensualesService {
         return repository.findById(Long.parseLong(id)).orElse(null);
     }
 
-    public void save(CostosMensuales costos) {
-        repository.save(costos);
+    public CostosMensuales save(CostosMensuales costos) {
+        return repository.save(costos);
     }
 }

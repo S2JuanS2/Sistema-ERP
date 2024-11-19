@@ -1,4 +1,4 @@
-package fi.uba.memo1.apirest.finanzas.model;
+package fi.uba.memo1.apirest.finanzas.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
