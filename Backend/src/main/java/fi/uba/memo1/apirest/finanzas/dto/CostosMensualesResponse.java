@@ -1,14 +1,5 @@
 package fi.uba.memo1.apirest.finanzas.dto;
 
-/*
-                                    savedCostos.getId(),
-                                            savedCostos.getId_rol(),
-                                            savedCostos.getMes(),
-                                            savedCostos.getAnio(),
-                                            savedCostos.getCosto()
-
- */
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
