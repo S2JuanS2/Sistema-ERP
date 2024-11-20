@@ -6,7 +6,7 @@ Feature: Load cost of a role
     And a role cost "3000"
     When I POST to the route "/api/v1/finanzas/cargar-costo"
     Then the status code should be 201
-    #And the response should be The Object with the role name, experience and cost
+    And the response should be the object
 
   Scenario: Fail to load cost with non existing role name
     Given I have a role name "Administrador"

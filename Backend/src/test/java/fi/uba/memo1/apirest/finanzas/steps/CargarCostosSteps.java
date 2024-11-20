@@ -1,5 +1,6 @@
 package fi.uba.memo1.apirest.finanzas.steps;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesRequest;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
@@ -101,4 +102,18 @@ public class CargarCostosSteps {
         assertTrue(Objects.requireNonNull(this.response.toString()).contains(text));
     }
 
+    @And("the response should be the object")
+    public void theResponseShouldBeTheObject() throws JsonProcessingException {
+        if(this.exception != null) {
+            return;
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode responseJson = mapper.readTree(Objects.requireNonNull(this.response.getBody()).toString());
+
+        assertTrue(responseJson.has("id"));
+        assertTrue(responseJson.has("idRol"));
+        assertTrue(responseJson.has("mes"));
+        assertTrue(responseJson.has("anio"));
+        assertTrue(responseJson.has("costo"));
+    }
 }
