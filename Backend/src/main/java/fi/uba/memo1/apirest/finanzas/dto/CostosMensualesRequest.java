@@ -5,10 +5,8 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class CargarCostoRequest {
+public class CostosMensualesRequest {
     private String nombre;
-
     private String experiencia;
-
     private double costo;
 }

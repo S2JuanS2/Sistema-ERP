@@ -1,11 +1,14 @@
 package fi.uba.memo1.apirest.finanzas.unit;
 
-import fi.uba.memo1.apirest.finanzas.dto.CargarCostoRequest;
+import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesRequest;
+import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesResponse;
+import fi.uba.memo1.apirest.finanzas.dto.ErrorResponse;
 import fi.uba.memo1.apirest.finanzas.model.CostosMensuales;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
@@ -16,6 +19,7 @@ import java.util.Objects;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 class FinanzasApplicationTests {
     private static final String COSTOS_URL = "/api/v1/finanzas/costos";
     private final String CARGAR_COSTOS_URL = "/api/v1/finanzas/cargar-costo";
@@ -32,24 +36,25 @@ class FinanzasApplicationTests {
 
     @Test
     void cargarCostoExitosamente() {
-        CargarCostoRequest request = new CargarCostoRequest();
+        CostosMensualesRequest request = new CostosMensualesRequest();
         request.setCosto(1000);
         request.setNombre("Desarrollador");
         request.setExperiencia("Senior");
 
-        Mono<String> response = webClient.post()
+        Mono<CostosMensualesResponse> response = webClient.post()
                 .uri(CARGAR_COSTOS_URL)
-                .body(Mono.just(request), CargarCostoRequest.class)
+                .body(Mono.just(request), CostosMensualesRequest.class)
                 .retrieve()
-                .bodyToMono(String.class);
+                .bodyToMono(CostosMensualesResponse.class);
 
-        String res = response.block();
-        assertTrue(Objects.requireNonNull(res).startsWith("Se cargo el costo con ID:"));
+        CostosMensualesResponse costosMensualesResponse = response.block();
+        assertNotNull(costosMensualesResponse);
+        assertEquals(1000, costosMensualesResponse.getCosto());
     }
 
     @Test
     void noSePuedeCargarCostoConNombreInexistente() {
-        CargarCostoRequest request = new CargarCostoRequest();
+        CostosMensualesRequest request = new CostosMensualesRequest();
         request.setCosto(1000);
         request.setNombre("Administrador");
         request.setExperiencia("Senior");
@@ -57,7 +62,7 @@ class FinanzasApplicationTests {
         WebClientResponseException exception = assertThrows(WebClientResponseException.class, () -> {
             Mono<String> response = webClient.post()
                     .uri(CARGAR_COSTOS_URL)
-                    .body(Mono.just(request), CargarCostoRequest.class)
+                    .body(Mono.just(request), CostosMensualesRequest.class)
                     .retrieve()
                     .bodyToMono(String.class);
 
@@ -65,13 +70,13 @@ class FinanzasApplicationTests {
         });
 
         assertEquals(404, exception.getStatusCode().value());
-        assertEquals("Rol no encontrado", exception.getResponseBodyAsString());
+        assertEquals("No se encontró un rol con nombre y experiencia coincidentes", exception.getResponseBodyAs(ErrorResponse.class).getMessage());
     }
 
 
     @Test
     void noSePuedeCargarCostoConExperienciaInexistente() {
-        CargarCostoRequest request = new CargarCostoRequest();
+        CostosMensualesRequest request = new CostosMensualesRequest();
         request.setCosto(1000);
         request.setNombre("Desarrollador");
         request.setExperiencia("Entry");
@@ -79,7 +84,7 @@ class FinanzasApplicationTests {
         WebClientResponseException exception = assertThrows(WebClientResponseException.class, () -> {
             Mono<String> response = webClient.post()
                     .uri(CARGAR_COSTOS_URL)
-                    .body(Mono.just(request), CargarCostoRequest.class)
+                    .body(Mono.just(request), CostosMensualesRequest.class)
                     .retrieve()
                     .bodyToMono(String.class);
 
@@ -87,7 +92,7 @@ class FinanzasApplicationTests {
         });
 
         assertEquals(404, exception.getStatusCode().value());
-        assertEquals("Rol no encontrado", exception.getResponseBodyAsString());
+        assertEquals("No se encontró un rol con nombre y experiencia coincidentes", exception.getResponseBodyAs(ErrorResponse.class).getMessage());
     }
 
     @Test
@@ -101,14 +106,14 @@ class FinanzasApplicationTests {
         List<CostosMensuales> costos = response.block();
         int count = Objects.requireNonNull(costos).size();
 
-        CargarCostoRequest request = new CargarCostoRequest();
+        CostosMensualesRequest request = new CostosMensualesRequest();
         request.setCosto(1000);
         request.setNombre("Desarrollador");
         request.setExperiencia("Senior");
 
         Mono<String> response2 = webClient.post()
                 .uri(CARGAR_COSTOS_URL)
-                .body(Mono.just(request), CargarCostoRequest.class)
+                .body(Mono.just(request), CostosMensualesRequest.class)
                 .retrieve()
                 .bodyToMono(String.class);
 

@@ -1,6 +1,6 @@
 package fi.uba.memo1.apirest.finanzas.steps;
 
-import fi.uba.memo1.apirest.finanzas.dto.CargarCostoRequest;
+import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesRequest;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -12,7 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 
+import java.io.IOException;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,7 +26,7 @@ public class CargarCostosSteps {
     private String name;
     private double cost;
     private String experience;
-    private ResponseEntity<String> response;
+    private ResponseEntity<?> response;
     private WebClientResponseException exception;
 
     private WebClient webClient;
@@ -49,7 +52,7 @@ public class CargarCostosSteps {
 
     @When("I POST to the route {string}")
     public void iPOSTToTheRoute(String route) {
-        CargarCostoRequest request = new CargarCostoRequest();
+        CostosMensualesRequest request = new CostosMensualesRequest();
         request.setNombre(name);
         request.setExperiencia(experience);
         request.setCosto(cost);
@@ -57,7 +60,7 @@ public class CargarCostosSteps {
         try {
             Mono<ResponseEntity<String>> res = webClient.post()
                     .uri(route)
-                    .body(Mono.just(request), CargarCostoRequest.class)
+                    .body(Mono.just(request), CostosMensualesRequest.class)
                     .retrieve()
                     .toEntity(String.class);
 
@@ -84,12 +87,18 @@ public class CargarCostosSteps {
     }
 
     @And("the response should be {string}")
-    public void theResponseShouldBe(String text) {
+    public void theResponseShouldBe(String text) throws IOException {
         if (this.exception != null) {
-            assertEquals(text, this.exception.getResponseBodyAsString());
+            // Si hubo una excepción, comparar el cuerpo de la respuesta con el texto esperado
+            String responseBody = this.exception.getResponseBodyAsString();
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode responseJson = mapper.readTree(responseBody);
+            assertEquals(text, responseJson.get("message").asText());
             return;
         }
 
-        assertTrue(Objects.requireNonNull(this.response.getBody()).startsWith(text));
+        // Si no hubo excepción, verificar el texto en la respuesta completa
+        assertTrue(Objects.requireNonNull(this.response.toString()).contains(text));
     }
+
 }

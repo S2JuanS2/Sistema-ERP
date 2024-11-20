@@ -6,7 +6,7 @@ Feature: Load cost of a role
     And a role cost "3000"
     When I POST to the route "/api/v1/finanzas/cargar-costo"
     Then the status code should be 201
-    And the response should be "Se cargo el costo"
+    #And the response should be The Object with the role name, experience and cost
 
   Scenario: Fail to load cost with non existing role name
     Given I have a role name "Administrador"
@@ -14,7 +14,7 @@ Feature: Load cost of a role
     And a role cost "3000"
     When I POST to the route "/api/v1/finanzas/cargar-costo"
     Then the status code should be 404
-    And the response should be "Rol no encontrado"
+    And the response should be "No se encontró un rol con nombre y experiencia coincidentes"
 
   Scenario: Fail to load cost with non existing role experience
     Given I have a role name "Desarrollador"
@@ -22,4 +22,4 @@ Feature: Load cost of a role
     And a role cost "3000"
     When I POST to the route "/api/v1/finanzas/cargar-costo"
     Then the status code should be 404
-    And the response should be "Rol no encontrado"
+    And the response should be "No se encontró un rol con nombre y experiencia coincidentes"

@@ -14,5 +14,4 @@ import static io.cucumber.junit.platform.engine.Constants.PLUGIN_PROPERTY_NAME;
 @ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "fi.uba.memo1.apirest.finanzas")
 public class RunCucumberTest {
-
 }
