@@ -1,0 +1,12 @@
+name: test containers cleanup
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-container-cleanup:
+    runs-on: self-hosted
+    steps:
+      - uses: kacus/github-action-container-cleanup@v1.0.0
+      - name: launch mysql container
+        run: docker run -e MYSQL_ROOT_PASSWORD=123 -d mysql
