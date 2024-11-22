@@ -1,9 +1,6 @@
 package fi.uba.memo1.apirest.finanzas.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -11,6 +8,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Getter
 @Setter
+@EqualsAndHashCode
 public class Rol implements Serializable {
     private String id;
     private String nombre;
