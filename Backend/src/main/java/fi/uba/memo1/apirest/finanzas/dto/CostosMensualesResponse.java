@@ -13,7 +13,7 @@ import java.io.Serializable;
 @Setter
 public class CostosMensualesResponse implements Serializable {
     private Long id;
-    private String idRol;
+    private Rol rol;
     private String mes;
     private String anio;
     private Double costo;

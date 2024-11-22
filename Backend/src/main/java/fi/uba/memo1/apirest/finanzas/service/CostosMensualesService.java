@@ -38,7 +38,7 @@ public class CostosMensualesService implements ICostosMensualesService {
 
     @Override
     public CostosMensuales findById(Long id) {
-        return repository.findById(id).orElseThrow(() -> new CostoMensualNoEncontradoException());
+        return repository.findById(id).orElseThrow(CostoMensualNoEncontradoException::new);
     }
 
 
@@ -65,7 +65,7 @@ public class CostosMensualesService implements ICostosMensualesService {
         return matchingRolMono.flatMap(matchingRol -> {
             LocalDate currentDate = LocalDate.now();
             CostosMensuales costosMensuales = new CostosMensuales();
-            costosMensuales.setIdRol(matchingRol.getId());
+            costosMensuales.setRol(matchingRol);
             costosMensuales.setMes(String.valueOf(currentDate.getMonthValue()));
             costosMensuales.setAnio(String.valueOf(currentDate.getYear()));
             costosMensuales.setCosto(costos.getCosto());
@@ -76,7 +76,7 @@ public class CostosMensualesService implements ICostosMensualesService {
                     .map(savedCostos ->
                             new CostosMensualesResponse(
                                     savedCostos.getId(),
-                                    savedCostos.getIdRol(),
+                                    savedCostos.getRol(),
                                     savedCostos.getMes(),
                                     savedCostos.getAnio(),
                                     savedCostos.getCosto()
