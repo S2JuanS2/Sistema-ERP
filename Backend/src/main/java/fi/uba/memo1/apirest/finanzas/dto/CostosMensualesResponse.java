@@ -23,11 +23,11 @@ public class CostosMensualesResponse implements Serializable {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         CostosMensualesResponse that = (CostosMensualesResponse) o;
-        return Objects.equals(id, that.id) && Objects.equals(idRol, that.idRol) && Objects.equals(mes, that.mes) && Objects.equals(anio, that.anio) && Objects.equals(costo, that.costo);
+        return Objects.equals(id, that.id) && Objects.equals(rol, that.rol) && Objects.equals(mes, that.mes) && Objects.equals(anio, that.anio) && Objects.equals(costo, that.costo);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, idRol, mes, anio, costo);
+        return Objects.hash(id, rol, mes, anio, costo);
     }
 }
