@@ -70,7 +70,7 @@ class FinanzasApplicationTests {
         });
 
         assertEquals(404, exception.getStatusCode().value());
-        assertEquals("No se encontró un rol con nombre y experiencia coincidentes", exception.getResponseBodyAs(ErrorResponse.class).getMessage());
+        assertEquals("No se encontró un rol con nombre y experiencia coincidentes", Objects.requireNonNull(exception.getResponseBodyAs(ErrorResponse.class)).getMessage());
     }
 
 
@@ -92,7 +92,7 @@ class FinanzasApplicationTests {
         });
 
         assertEquals(404, exception.getStatusCode().value());
-        assertEquals("No se encontró un rol con nombre y experiencia coincidentes", exception.getResponseBodyAs(ErrorResponse.class).getMessage());
+        assertEquals("No se encontró un rol con nombre y experiencia coincidentes", Objects.requireNonNull(exception.getResponseBodyAs(ErrorResponse.class)).getMessage());
     }
 
     @Test
@@ -128,5 +128,47 @@ class FinanzasApplicationTests {
         List<CostosMensuales> costos2 = response3.block();
 
         assertEquals(count + 1, Objects.requireNonNull(costos2).size());
+    }
+
+    @Test
+    void seBuscaElIDCorrectamente() {
+        CostosMensualesRequest request = new CostosMensualesRequest();
+        request.setCosto(1000);
+        request.setNombre("Desarrollador");
+        request.setExperiencia("Senior");
+
+        Mono<CostosMensualesResponse> response2 = webClient.post()
+                .uri(CARGAR_COSTOS_URL)
+                .body(Mono.just(request), CostosMensualesRequest.class)
+                .retrieve()
+                .bodyToMono(CostosMensualesResponse.class);
+
+        CostosMensualesResponse costosMensualesResponse = response2.block();
+
+        Mono<List<CostosMensuales>> response = webClient.get()
+                .uri(COSTOS_URL + "/" + Objects.requireNonNull(costosMensualesResponse).getId().toString())
+                .retrieve()
+                .bodyToFlux(CostosMensuales.class)
+                .collectList();
+
+        List<CostosMensuales> costos = response.block();
+        CostosMensuales ultimoCosto = Objects.requireNonNull(costos).get(costos.size() - 1);
+
+        assertEquals(1000, ultimoCosto.getCosto());
+    }
+
+    @Test
+    void noSePuedeBuscarCostoInexistente() {
+        WebClientResponseException exception = assertThrows(WebClientResponseException.class, () -> {
+            Mono<String> response = webClient.get()
+                    .uri(COSTOS_URL + "/1000")
+                    .retrieve()
+                    .bodyToMono(String.class);
+
+            response.block();
+        });
+
+        assertEquals(404, exception.getStatusCode().value());
+        assertEquals("Costo mensual no encontrado", Objects.requireNonNull(exception.getResponseBodyAs(ErrorResponse.class)).getMessage());
     }
 }
