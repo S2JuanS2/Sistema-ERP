@@ -1,5 +1,6 @@
 package fi.uba.memo1.apirest.finanzas.model;
 
+import fi.uba.memo1.apirest.finanzas.dto.Rol;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +16,7 @@ public class CostosMensuales {
     private Long id;
 
     @Column(nullable = false)
-    private String idRol;
+    private Rol rol;
 
     @Column(nullable = false)
     private String mes;
