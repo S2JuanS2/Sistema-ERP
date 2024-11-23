@@ -6,7 +6,6 @@ import fi.uba.memo1.apirest.finanzas.exception.RolNoEncontradoException;
 import fi.uba.memo1.apirest.finanzas.service.CostosMensualesService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;

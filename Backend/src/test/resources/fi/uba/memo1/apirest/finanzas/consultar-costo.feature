@@ -19,4 +19,4 @@ Feature: Getting costs
     And I add a role cost with name "Desarrollador", experience "Semi-Senior", cost "2000"
     When I GET to the route "/api/v1/finanzas/costos/" with an invalid id
     Then the response should have status 404
-    And the response should contain the message "Costo mensual no encontrado"
+    And the response should contain the message "No se encontró un rol con nombre y experiencia coincidentes"
