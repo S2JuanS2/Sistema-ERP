@@ -29,4 +29,15 @@ public class ControllerAdvice {
                 .build();
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
+
+    @ExceptionHandler(CostoMensualNegativoException.class)
+    public ResponseEntity<ErrorResponse> CostoNegativoException(CostoMensualNegativoException e) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .statusCode("400")
+                .status("Bad Request")
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+    
 }
