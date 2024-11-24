@@ -169,6 +169,6 @@ class FinanzasApplicationTests {
         });
 
         assertEquals(404, exception.getStatusCode().value());
-        assertEquals("Costo mensual no encontrado", Objects.requireNonNull(exception.getResponseBodyAs(ErrorResponse.class)).getMessage());
+        assertEquals("No se encontró un rol con nombre y experiencia coincidentes", Objects.requireNonNull(exception.getResponseBodyAs(ErrorResponse.class)).getMessage());
     }
 }

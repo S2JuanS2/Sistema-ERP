@@ -1,10 +1,19 @@
 package fi.uba.memo1.apirest.finanzas.controller;
 
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesRequest;
+import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesResponse;
+import fi.uba.memo1.apirest.finanzas.exception.RolNoEncontradoException;
 import fi.uba.memo1.apirest.finanzas.service.CostosMensualesService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -16,18 +25,26 @@ public class CostosMensualesController {
         this.service = service;
     }
 
+    @Operation(summary = "Obtener todos los costos mensuales")
+    @ApiResponse(responseCode = "200", description = "Costos mensuales encontrados")
     @GetMapping("/costos")
-    public ResponseEntity<?> getCostos() {
+    public ResponseEntity<Mono<List<CostosMensualesResponse>>> getCostos() {
         return ResponseEntity.status(HttpStatus.OK).body(service.findAll());
     }
 
+    @Operation(summary = "Obtener un costo mensual por id")
+    @ApiResponse(responseCode = "200", description = "Costo mensual encontrado")
+    @ApiResponse(responseCode = "404", description = "Costo mensual no encontrado, rol invalido", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RolNoEncontradoException.class)))
     @GetMapping("/costos/{id}")
-    public ResponseEntity<?> getCostos(@PathVariable Long id) {
+    public ResponseEntity<Mono<CostosMensualesResponse>> getCostos(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(service.findById(id));
     }
 
+    @Operation(summary = "Cargar un costo mensual")
+    @ApiResponse(responseCode = "201", description = "Costo mensual cargado")
+    @ApiResponse(responseCode = "404", description = "Error en la carga del costo mensual", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RolNoEncontradoException.class)))
     @PostMapping("/cargar-costo")
-    public ResponseEntity<?> cargarCosto(@RequestBody CostosMensualesRequest costosMensualesRequest) {
+    public ResponseEntity<Mono<CostosMensualesResponse>> cargarCosto(@RequestBody CostosMensualesRequest costosMensualesRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(costosMensualesRequest));
     }
 }

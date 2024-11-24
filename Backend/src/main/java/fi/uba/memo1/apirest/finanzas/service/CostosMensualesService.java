@@ -3,7 +3,6 @@ package fi.uba.memo1.apirest.finanzas.service;
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesRequest;
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesResponse;
 import fi.uba.memo1.apirest.finanzas.dto.Rol;
-import fi.uba.memo1.apirest.finanzas.exception.CostoMensualNoEncontradoException;
 import fi.uba.memo1.apirest.finanzas.exception.RolNoEncontradoException;
 import fi.uba.memo1.apirest.finanzas.model.CostosMensuales;
 import fi.uba.memo1.apirest.finanzas.repository.CostosMensualesRepository;
@@ -12,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -32,13 +32,57 @@ public class CostosMensualesService implements ICostosMensualesService {
     }
 
     @Override
-    public List<CostosMensuales> findAll() {
-        return repository.findAll();
+    public Mono<List<CostosMensualesResponse>> findAll() {
+        return rolesWebClient
+                .get()
+                .uri("/roles")
+                .retrieve()
+                .bodyToFlux(Rol.class)
+                .collectList()
+                .flatMapMany(roles -> Flux.fromIterable(repository.findAll()).map(
+                        costosMensuales -> {
+                            Rol matchingRol = roles.stream()
+                                    .filter(rol -> rol.getId().equals(costosMensuales.getIdRol()))
+                                    .findFirst()
+                                    .orElseThrow(RolNoEncontradoException::new);
+
+                            return new CostosMensualesResponse(
+                                    costosMensuales.getId(),
+                                    matchingRol,
+                                    costosMensuales.getMes(),
+                                    costosMensuales.getAnio(),
+                                    costosMensuales.getCosto()
+                            );
+                        })
+                )
+                .collectList();
     }
 
     @Override
-    public CostosMensuales findById(Long id) {
-        return repository.findById(id).orElseThrow(CostoMensualNoEncontradoException::new);
+    public Mono<CostosMensualesResponse> findById(Long id) {
+        return rolesWebClient
+                .get()
+                .uri("/roles")
+                .retrieve()
+                .bodyToFlux(Rol.class)
+                .collectList()
+                .flatMap(roles -> Mono.justOrEmpty(repository.findById(id))
+                        .switchIfEmpty(Mono.error(new RolNoEncontradoException()))
+                        .map(costosMensuales -> {
+                            Rol matchingRol = roles.stream()
+                                    .filter(rol -> rol.getId().equals(costosMensuales.getIdRol()))
+                                    .findFirst()
+                                    .orElseThrow(RolNoEncontradoException::new);
+
+                            return new CostosMensualesResponse(
+                                    costosMensuales.getId(),
+                                    matchingRol,
+                                    costosMensuales.getMes(),
+                                    costosMensuales.getAnio(),
+                                    costosMensuales.getCosto()
+                            );
+                        })
+                );
     }
 
 
@@ -65,7 +109,7 @@ public class CostosMensualesService implements ICostosMensualesService {
         return matchingRolMono.flatMap(matchingRol -> {
             LocalDate currentDate = LocalDate.now();
             CostosMensuales costosMensuales = new CostosMensuales();
-            costosMensuales.setRol(matchingRol);
+            costosMensuales.setIdRol(matchingRol.getId());
             costosMensuales.setMes(String.valueOf(currentDate.getMonthValue()));
             costosMensuales.setAnio(String.valueOf(currentDate.getYear()));
             costosMensuales.setCosto(costos.getCosto());
@@ -76,7 +120,7 @@ public class CostosMensualesService implements ICostosMensualesService {
                     .map(savedCostos ->
                             new CostosMensualesResponse(
                                     savedCostos.getId(),
-                                    savedCostos.getRol(),
+                                    matchingRol,
                                     savedCostos.getMes(),
                                     savedCostos.getAnio(),
                                     savedCostos.getCosto()
