@@ -204,4 +204,61 @@ class FinanzasApplicationTests {
         assertEquals(costosMensualesResponse.getId(), updatedCostosMensualesResponse.getId());
     }
 
+    @Test
+    void noSePuedeCrearCostoConValorNegativo() {
+        CostosMensualesRequest request = new CostosMensualesRequest();
+        request.setCosto(-100);
+        request.setNombre("Desarrollador");
+        request.setExperiencia("Senior");
+
+        WebClientResponseException exception = assertThrows(WebClientResponseException.class, () -> {
+            Mono<String> response = webClient.post()
+                    .uri(CARGAR_COSTOS_URL)
+                    .body(Mono.just(request), CostosMensualesRequest.class)
+                    .retrieve()
+                    .bodyToMono(String.class);
+
+            response.block();
+        });
+
+        assertEquals(400, exception.getStatusCode().value());
+        assertEquals("El nuevo costo del recurso no puede ser un monto negativo", 
+        Objects.requireNonNull(exception.getResponseBodyAs(ErrorResponse.class)).getMessage());
+    }
+
+    @Test
+    void noSePuedeModificarCostoConValorNegativo() {
+
+        CostosMensualesRequest request = new CostosMensualesRequest();
+        request.setCosto(1000);
+        request.setNombre("Desarrollador");
+        request.setExperiencia("Senior");
+
+        Mono<CostosMensualesResponse> response = webClient.post()
+                .uri(CARGAR_COSTOS_URL)
+                .body(Mono.just(request), CostosMensualesRequest.class)
+                .retrieve()
+                .bodyToMono(CostosMensualesResponse.class);
+
+        CostosMensualesResponse costosMensualesResponse = response.block();
+
+        CostoRequest costoRequest = new CostoRequest();
+        costoRequest.setCosto(-500);
+
+        WebClientResponseException exception = assertThrows(WebClientResponseException.class, () -> {
+            Mono<String> response2 = webClient.put()
+                    .uri(COSTOS_URL + "/actualizar-costo/" + Objects.requireNonNull(costosMensualesResponse).getId())
+                    .body(Mono.just(costoRequest), CostoRequest.class)
+                    .retrieve()
+                    .bodyToMono(String.class);
+
+            response2.block();
+        });
+
+        assertEquals(400, exception.getStatusCode().value());
+        assertEquals("El nuevo costo del recurso no puede ser un monto negativo", 
+        Objects.requireNonNull(exception.getResponseBodyAs(ErrorResponse.class)).getMessage());
+    }
+
+
 }
