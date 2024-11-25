@@ -1,5 +1,6 @@
 package fi.uba.memo1.apirest.finanzas.unit;
 
+import fi.uba.memo1.apirest.finanzas.dto.CostoRequest;
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesRequest;
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesResponse;
 import fi.uba.memo1.apirest.finanzas.dto.ErrorResponse;
@@ -171,4 +172,36 @@ class FinanzasApplicationTests {
         assertEquals(404, exception.getStatusCode().value());
         assertEquals("No se encontró un rol con nombre y experiencia coincidentes", Objects.requireNonNull(exception.getResponseBodyAs(ErrorResponse.class)).getMessage());
     }
+
+    @Test
+    void seModificaElCostoCorrectamente() {
+        CostosMensualesRequest request = new CostosMensualesRequest();
+        request.setCosto(1000);
+        request.setNombre("Desarrollador");
+        request.setExperiencia("Senior");
+
+        Mono<CostosMensualesResponse> response2 = webClient.post()
+                .uri(CARGAR_COSTOS_URL)
+                .body(Mono.just(request), CostosMensualesRequest.class)
+                .retrieve()
+                .bodyToMono(CostosMensualesResponse.class);
+
+        CostosMensualesResponse costosMensualesResponse = response2.block();
+
+        CostoRequest costoRequest = new CostoRequest();
+        costoRequest.setCosto(1200);
+
+        Mono<CostosMensualesResponse> response3 = webClient.put()
+                .uri(COSTOS_URL + "/actualizar-costo/" + costosMensualesResponse.getId())
+                .body(Mono.just(costoRequest), CostoRequest.class)
+                .retrieve()
+                .bodyToMono(CostosMensualesResponse.class);
+
+        CostosMensualesResponse updatedCostosMensualesResponse = response3.block();
+
+        assertNotNull(updatedCostosMensualesResponse);
+        assertEquals(1200, updatedCostosMensualesResponse.getCosto());
+        assertEquals(costosMensualesResponse.getId(), updatedCostosMensualesResponse.getId());
+    }
+
 }

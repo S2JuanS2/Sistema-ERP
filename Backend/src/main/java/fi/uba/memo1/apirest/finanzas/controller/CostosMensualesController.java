@@ -2,6 +2,7 @@ package fi.uba.memo1.apirest.finanzas.controller;
 
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesRequest;
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesResponse;
+import fi.uba.memo1.apirest.finanzas.dto.CostoRequest;
 import fi.uba.memo1.apirest.finanzas.exception.RolNoEncontradoException;
 import fi.uba.memo1.apirest.finanzas.service.CostosMensualesService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,4 +48,13 @@ public class CostosMensualesController {
     public ResponseEntity<Mono<CostosMensualesResponse>> cargarCosto(@RequestBody CostosMensualesRequest costosMensualesRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(costosMensualesRequest));
     }
+
+    @Operation(summary = "Actualizar un costo mensual")
+    @ApiResponse(responseCode = "200", description = "Costo mensual actualizado")
+    @ApiResponse(responseCode = "400", description = "Error en la actualización del costo mensual, el costo no puede ser negativo",  content = @Content(mediaType = "application/json", schema = @Schema(implementation = RolNoEncontradoException.class)))
+    @PutMapping("/costos/actualizar-costo/{id}")
+    public ResponseEntity<Mono<CostosMensualesResponse>> actualizarCosto(@PathVariable Long id, @RequestBody CostoRequest costoRequest){
+        return ResponseEntity.status(HttpStatus.OK).body(service.update(id, costoRequest));
+    }
+    
 }

@@ -3,7 +3,10 @@ package fi.uba.memo1.apirest.finanzas.service;
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesRequest;
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesResponse;
 import fi.uba.memo1.apirest.finanzas.dto.Rol;
+import fi.uba.memo1.apirest.finanzas.dto.CostoRequest;
 import fi.uba.memo1.apirest.finanzas.exception.RolNoEncontradoException;
+import fi.uba.memo1.apirest.finanzas.exception.CostoMensualNegativoException;
+import fi.uba.memo1.apirest.finanzas.exception.CostoMensualNoEncontradoException;
 import fi.uba.memo1.apirest.finanzas.model.CostosMensuales;
 import fi.uba.memo1.apirest.finanzas.repository.CostosMensualesRepository;
 import jakarta.transaction.Transactional;
@@ -128,4 +131,42 @@ public class CostosMensualesService implements ICostosMensualesService {
                     );
         });
     }
+
+    @Transactional
+    @Override
+    public Mono<CostosMensualesResponse> update(Long id, CostoRequest costoRequest) {
+
+        if (costoRequest.getCosto() < 0) {
+                return Mono.error(new CostoMensualNegativoException());
+        }
+
+        return rolesWebClient
+            .get()
+            .uri("/roles")
+            .retrieve()
+            .bodyToFlux(Rol.class)
+            .collectList()
+            .flatMap(roles -> Mono.fromCallable(() -> repository.findById(id)
+                    .orElseThrow(CostoMensualNoEncontradoException::new))
+                    .flatMap(costoExistente -> {
+
+                        Rol matchingRol = roles.stream()
+                                .filter(rol -> rol.getId().equals(costoExistente.getIdRol()))
+                                .findFirst()
+                                .orElseThrow(RolNoEncontradoException::new);
+
+                        costoExistente.setCosto(costoRequest.getCosto());
+                        return Mono.fromCallable(() -> repository.save(costoExistente))
+                                .map(costoActualizado -> new CostosMensualesResponse(
+                                        costoActualizado.getId(),
+                                        matchingRol,
+                                        costoActualizado.getMes(),
+                                        costoActualizado.getAnio(),
+                                        costoActualizado.getCosto()
+                                ));
+                    })
+            )
+            .subscribeOn(Schedulers.boundedElastic());
+    }
+
 }
