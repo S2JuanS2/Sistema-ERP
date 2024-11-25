@@ -136,7 +136,7 @@ public class CostosMensualesService implements ICostosMensualesService {
     @Override
     public Mono<CostosMensualesResponse> update(Long id, CostoRequest costoRequest) {
 
-        if (costoRequest.getNuevoCosto() < 0) {
+        if (costoRequest.getCosto() < 0) {
                 return Mono.error(new CostoMensualNegativoException());
         }
 
@@ -155,7 +155,7 @@ public class CostosMensualesService implements ICostosMensualesService {
                                 .findFirst()
                                 .orElseThrow(RolNoEncontradoException::new);
 
-                        costoExistente.setCosto(costoRequest.getNuevoCosto());
+                        costoExistente.setCosto(costoRequest.getCosto());
                         return Mono.fromCallable(() -> repository.save(costoExistente))
                                 .map(costoActualizado -> new CostosMensualesResponse(
                                         costoActualizado.getId(),

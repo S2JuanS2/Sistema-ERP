@@ -6,5 +6,5 @@ import lombok.Setter;
 @Setter
 @Getter
 public class CostoRequest {
-    private double nuevoCosto;
+    private double costo;
 }

@@ -53,7 +53,7 @@ public class ModificarCostoSteps {
     public void iPUTToTheRoute(String route, Integer id) {
         this.id = Long.valueOf(id.longValue());
         CostoRequest request = new CostoRequest();
-        request.setNuevoCosto(nuevoCosto);
+        request.setCosto(nuevoCosto);
 
         try {
             this.response = webClient.put()
