@@ -192,7 +192,7 @@ class FinanzasApplicationTests {
         costoRequest.setNuevoCosto(1200);
 
         Mono<CostosMensualesResponse> response3 = webClient.put()
-                .uri(COSTOS_URL + "/" + costosMensualesResponse.getId() + "/actualizar-costo")
+                .uri(COSTOS_URL + "/actualizar-costo/" + costosMensualesResponse.getId())
                 .body(Mono.just(costoRequest), CostoRequest.class)
                 .retrieve()
                 .bodyToMono(CostosMensualesResponse.class);
