@@ -92,6 +92,11 @@ public class CostosMensualesService implements ICostosMensualesService {
     @Transactional
     @Override
     public Mono<CostosMensualesResponse> save(CostosMensualesRequest costos) {
+        
+        if (costos.getCosto() < 0) {
+                return Mono.error(new CostoMensualNegativoException());
+        }
+
         Mono<List<Rol>> rolesMono = rolesWebClient
                 .get()
                 .uri("/roles")
