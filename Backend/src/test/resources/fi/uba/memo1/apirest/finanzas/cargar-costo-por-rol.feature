@@ -24,7 +24,7 @@ Feature: Load cost of a role
     Then the status code should be 404
     And the response should be "No se encontró un rol con nombre y experiencia coincidentes"
 
-  Scenario: Fail to load cost with non existing role experience
+  Scenario: Fail to load cost with a negative amount
     Given I have a role name "Desarrollador"
     And a role experience "Senior"
     And a role cost "-100"
