@@ -26,11 +26,16 @@ import java.util.List;
 @Service
 public class CostosMensualesService implements ICostosMensualesService {
 
+    public static final int ENERO = 1;
+    public static final int DICIEMBRE = 12;
+    public static final int ANIO_MINIMO = 1900;
+
     @Autowired
     @Qualifier("rolesWebClient")
     private WebClient rolesWebClient;
-
+    
     private final CostosMensualesRepository repository;
+
 
     public CostosMensualesService(CostosMensualesRepository repository) {
         this.repository = repository;
@@ -98,11 +103,11 @@ public class CostosMensualesService implements ICostosMensualesService {
         if (!(costos.getAnio() == null && costos.getMes() == null)){
                 int anio = Integer.parseInt(costos.getAnio());
                 int anioActual = Year.now().getValue();
-                if (anio < 1900 || anio > anioActual) {
+                if (anio < ANIO_MINIMO || anio > anioActual) {
                         return Mono.error(new FechaInvalidaException());
                 }
                 int mes = Integer.parseInt(costos.getMes());
-                if (mes < 1 || mes > 12) {
+                if (mes < ENERO || mes > DICIEMBRE) {
                         return Mono.error(new FechaInvalidaException());
                 }
         }
