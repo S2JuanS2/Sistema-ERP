@@ -24,6 +24,8 @@ public class CargarCostosSteps {
     private String name;
     private double cost;
     private String experience;
+    private String month;
+    private String year;
     private ResponseEntity<CostosMensualesResponse> response;
     private WebClientResponseException exception;
 
@@ -48,12 +50,26 @@ public class CargarCostosSteps {
         this.name = name;
     }
 
+    @Given("a month {string}")
+    public void aMonth(String month) {
+        this.month = month;
+        
+    }
+    @Given("a year {string}")
+    public void aYear(String year) {
+        this.year = year;
+    }
+
     @When("I POST to the route {string}")
     public void iPOSTToTheRoute(String route) {
         CostosMensualesRequest request = new CostosMensualesRequest();
         request.setNombre(name);
         request.setExperiencia(experience);
         request.setCosto(cost);
+        if(!(this.month == null && this.year == null)){
+            request.setMes(month);
+            request.setAnio(year);
+        }
 
         try {
             this.response = webClient.post()
