@@ -39,5 +39,15 @@ public class ControllerAdvice {
                 .build();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
+
+    @ExceptionHandler(FechaInvalidaException.class)
+    public ResponseEntity<ErrorResponse> FechaInvalidaException(FechaInvalidaException e) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .statusCode("400")
+                .status("Bad Request")
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
     
 }
