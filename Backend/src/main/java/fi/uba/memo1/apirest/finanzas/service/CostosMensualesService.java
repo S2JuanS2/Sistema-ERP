@@ -7,6 +7,7 @@ import fi.uba.memo1.apirest.finanzas.dto.CostoRequest;
 import fi.uba.memo1.apirest.finanzas.exception.RolNoEncontradoException;
 import fi.uba.memo1.apirest.finanzas.exception.CostoMensualNegativoException;
 import fi.uba.memo1.apirest.finanzas.exception.CostoMensualNoEncontradoException;
+import fi.uba.memo1.apirest.finanzas.exception.FechaInvalidaException;
 import fi.uba.memo1.apirest.finanzas.model.CostosMensuales;
 import fi.uba.memo1.apirest.finanzas.repository.CostosMensualesRepository;
 import jakarta.transaction.Transactional;
@@ -19,6 +20,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.time.LocalDate;
+import java.time.Year;
 import java.util.List;
 
 @Service
@@ -93,6 +95,18 @@ public class CostosMensualesService implements ICostosMensualesService {
     @Override
     public Mono<CostosMensualesResponse> save(CostosMensualesRequest costos) {
         
+        if (!(costos.getAnio() == null && costos.getMes() == null)){
+                int anio = Integer.parseInt(costos.getAnio());
+                int anioActual = Year.now().getValue();
+                if (anio < 1900 || anio > anioActual) {
+                        return Mono.error(new FechaInvalidaException());
+                }
+                int mes = Integer.parseInt(costos.getMes());
+                if (mes < 1 || mes > 12) {
+                        return Mono.error(new FechaInvalidaException());
+                }
+        }
+            
         if (costos.getCosto() < 0) {
                 return Mono.error(new CostoMensualNegativoException());
         }
@@ -118,8 +132,16 @@ public class CostosMensualesService implements ICostosMensualesService {
             LocalDate currentDate = LocalDate.now();
             CostosMensuales costosMensuales = new CostosMensuales();
             costosMensuales.setIdRol(matchingRol.getId());
-            costosMensuales.setMes(String.valueOf(currentDate.getMonthValue()));
-            costosMensuales.setAnio(String.valueOf(currentDate.getYear()));
+            if (costos.getMes() != null){
+                costosMensuales.setMes(costos.getMes());
+            }else{
+                costosMensuales.setMes(String.valueOf(currentDate.getMonthValue()));
+            }
+            if (costos.getAnio() != null){
+                costosMensuales.setAnio(costos.getAnio());
+            }else{
+                costosMensuales.setAnio(String.valueOf(currentDate.getYear()));
+            }
             costosMensuales.setCosto(costos.getCosto());
 
             // Guardar en un Scheduler dedicado
