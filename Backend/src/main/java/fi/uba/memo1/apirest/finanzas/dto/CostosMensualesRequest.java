@@ -9,4 +9,6 @@ public class CostosMensualesRequest {
     private String nombre;
     private String experiencia;
     private double costo;
+    private String anio;
+    private String mes;
 }
