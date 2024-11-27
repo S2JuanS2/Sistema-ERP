@@ -2,7 +2,7 @@ package fi.uba.memo1.apirest.finanzas.controller;
 
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesRequest;
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesResponse;
-import fi.uba.memo1.apirest.finanzas.dto.CostosProyectoResponse;
+import fi.uba.memo1.apirest.finanzas.dto.TotalCostosProyectoResponse;
 import fi.uba.memo1.apirest.finanzas.dto.CostoRequest;
 import fi.uba.memo1.apirest.finanzas.exception.RolNoEncontradoException;
 import fi.uba.memo1.apirest.finanzas.service.CostosMensualesService;
@@ -60,7 +60,7 @@ public class CostosMensualesController {
     
     @Operation(summary = "Dado un año, obtener los costos mes a mes del proyecto")
     @GetMapping("/proyectos/{anio}")
-    public ResponseEntity<Mono<List<CostosProyectoResponse>>> getProyectos(@PathVariable String anio){
+    public ResponseEntity<Mono<TotalCostosProyectoResponse>> getProyectos(@PathVariable String anio){
         return ResponseEntity.status(HttpStatus.OK).body(service.obtenerCostosDeProyectos(anio));
     }
     

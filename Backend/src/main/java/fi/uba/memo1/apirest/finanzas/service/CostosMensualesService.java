@@ -8,6 +8,7 @@ import fi.uba.memo1.apirest.finanzas.dto.Proyecto;
 import fi.uba.memo1.apirest.finanzas.dto.CostosProyectoResponse;
 import fi.uba.memo1.apirest.finanzas.dto.Recurso;
 import fi.uba.memo1.apirest.finanzas.dto.Rol;
+import fi.uba.memo1.apirest.finanzas.dto.TotalCostosProyectoResponse;
 import fi.uba.memo1.apirest.finanzas.dto.CostoRequest;
 import fi.uba.memo1.apirest.finanzas.exception.RolNoEncontradoException;
 import fi.uba.memo1.apirest.finanzas.exception.CostoMensualNegativoException;
@@ -222,7 +223,7 @@ public class CostosMensualesService implements ICostosMensualesService {
     }
 
     @Override
-    public Mono<List<CostosProyectoResponse>> obtenerCostosDeProyectos(String anio) {
+    public Mono<TotalCostosProyectoResponse> obtenerCostosDeProyectos(String anio) {
         Mono<List<CostosMensuales>> costosMensualesMono = Mono.just(repository.findAll());
     
         Mono<List<Recurso>> recursosMono = recursosWebClient
@@ -247,7 +248,7 @@ public class CostosMensualesService implements ICostosMensualesService {
                 .flatMap(response -> processProjectCosts(response.getProjects(), anio, costosMensualesMono, recursosMono, proyectosMono));
     }
     
-    private Mono<List<CostosProyectoResponse>> processProjectCosts(
+    private Mono<TotalCostosProyectoResponse> processProjectCosts(
             List<HorasMensuales> costosProyectos, 
             String anio,
             Mono<List<CostosMensuales>> costosMensualesMono, 
@@ -259,12 +260,16 @@ public class CostosMensualesService implements ICostosMensualesService {
                     List<Proyecto> proyectos = tuple.getT1();
                     List<Recurso> recursos = tuple.getT2();
                     List<CostosMensuales> costosMensuales = tuple.getT3();
-    
+                    
                     List<CostosProyectoResponse> costosProyectoResponses = costosProyectos.stream()
-                            .map(costoProyecto -> buildProjectResponse(costoProyecto, anio, recursos, costosMensuales, proyectos))
-                            .collect(Collectors.toList());
-    
-                    return Mono.just(costosProyectoResponses);
+                    .map(costoProyecto -> buildProjectResponse(costoProyecto, anio, recursos, costosMensuales, proyectos))
+                    .collect(Collectors.toList());
+                    
+                    TotalCostosProyectoResponse totalCostosProyectoResponse = new TotalCostosProyectoResponse(costosProyectoResponses);
+                    for(int i = 0; i < costosProyectoResponses.size(); i++){
+                        totalCostosProyectoResponse.sumarCosto(costosProyectoResponses.get(i).getCostoTotal()); 
+                    }
+                    return Mono.just(totalCostosProyectoResponse);
                 });
     }
     
