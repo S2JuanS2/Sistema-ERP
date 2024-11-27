@@ -13,6 +13,7 @@ import fi.uba.memo1.apirest.finanzas.exception.RolNoEncontradoException;
 import fi.uba.memo1.apirest.finanzas.exception.CostoMensualNegativoException;
 import fi.uba.memo1.apirest.finanzas.exception.CostoMensualNoEncontradoException;
 import fi.uba.memo1.apirest.finanzas.exception.FechaInvalidaException;
+import fi.uba.memo1.apirest.finanzas.exception.RecursoNoEncontradoException;
 import fi.uba.memo1.apirest.finanzas.model.CostosMensuales;
 import fi.uba.memo1.apirest.finanzas.repository.CostosMensualesRepository;
 import jakarta.transaction.Transactional;
@@ -48,6 +49,10 @@ public class CostosMensualesService implements ICostosMensualesService {
     @Autowired
     @Qualifier("recursosWebClient")
     private WebClient recursosWebClient;
+
+    @Autowired
+    @Qualifier("HorasWebClient")
+    private WebClient horasWebClient;
 
     private final CostosMensualesRepository repository;
 
@@ -218,9 +223,8 @@ public class CostosMensualesService implements ICostosMensualesService {
 
     @Override
     public Mono<List<CostosProyectoResponse>> obtenerCostosDeProyectos(String anio) {
-    
         Mono<List<CostosMensuales>> costosMensualesMono = Mono.just(repository.findAll());
-
+    
         Mono<List<Recurso>> recursosMono = recursosWebClient
                 .get()
                 .uri("/recursos")
@@ -234,73 +238,93 @@ public class CostosMensualesService implements ICostosMensualesService {
                 .retrieve()
                 .bodyToFlux(Proyecto.class)
                 .collectList();
-    
-        String url = String.format("https://squad9-2024-2c-1.onrender.com/api/projects");
-        
-        return proyectosWebClient
+     
+        return horasWebClient
                 .get()
-                .uri(url)
+                .uri("/projects")
                 .retrieve()
                 .bodyToMono(CargaDeHoras.class)
-                .flatMap(response -> {
-                    List<HorasMensuales> costosProyectos = response.getProjects();
+                .flatMap(response -> processProjectCosts(response.getProjects(), anio, costosMensualesMono, recursosMono, proyectosMono));
+    }
     
-                    return Mono.zip(proyectosMono, recursosMono, costosMensualesMono)
-                            .flatMap(tuple -> {
-                                List<Proyecto> proyectos = tuple.getT1();
-                                List<Recurso> recursos = tuple.getT2();
-                                List<CostosMensuales> costosMensuales = tuple.getT3();
+    private Mono<List<CostosProyectoResponse>> processProjectCosts(
+            List<HorasMensuales> costosProyectos, 
+            String anio,
+            Mono<List<CostosMensuales>> costosMensualesMono, 
+            Mono<List<Recurso>> recursosMono, 
+            Mono<List<Proyecto>> proyectosMono) {
     
-                                List<CostosProyectoResponse> costosProyectoResponses = costosProyectos.stream().map(costoProyecto -> {
-                                    CostosProyectoResponse proyectoResponse = new CostosProyectoResponse();
-                                    for (int i = ENERO; i <= DICIEMBRE; i++){
-                                        proyectoResponse.getCostoPorMes().put(String.valueOf(i), 0.0);
-                                    }
-                                    String auxId = costoProyecto.getId();
-                                    
-                                    if (costoProyecto.getYears().containsKey(anio)) {
-                                        Map<String, Map<String, Integer>> yearMap = costoProyecto.getYears().get(anio);
+        return Mono.zip(proyectosMono, recursosMono, costosMensualesMono)
+                .flatMap(tuple -> {
+                    List<Proyecto> proyectos = tuple.getT1();
+                    List<Recurso> recursos = tuple.getT2();
+                    List<CostosMensuales> costosMensuales = tuple.getT3();
     
-                                        for (Map.Entry<String, Map<String, Integer>> monthEntry : yearMap.entrySet()) {
-                                            String month = monthEntry.getKey();
-                                            Map<String, Integer> workersMap = monthEntry.getValue();
+                    List<CostosProyectoResponse> costosProyectoResponses = costosProyectos.stream()
+                            .map(costoProyecto -> buildProjectResponse(costoProyecto, anio, recursos, costosMensuales, proyectos))
+                            .collect(Collectors.toList());
     
-                                            for (Map.Entry<String, Integer> workerEntry : workersMap.entrySet()) {
-                                                String workerId = workerEntry.getKey();
-                                                
-                                                String rolId = recursos.stream()
-                                                        .filter(recurso -> recurso.getId().equals(workerId))
-                                                        .map(Recurso::getRolId)
-                                                        .findFirst()
-                                                        .orElse(null);
-    
-                                                Double costoMensual = costosMensuales.stream()
-                                                        .filter(costoMensualItem -> costoMensualItem.getAnio().equals(anio) &&
-                                                                costoMensualItem.getMes().equals(month) &&
-                                                                costoMensualItem.getIdRol().equals(rolId))
-                                                        .map(CostosMensuales::getCosto)
-                                                        .findFirst()
-                                                        .orElse(null);
-    
-                                                if (costoMensual != null) {
-                                                    Double hoursWorked = workerEntry.getValue().doubleValue();
-                                                    Double costoTotal = hoursWorked * costoMensual;
-                                                    proyectoResponse.getCostoPorMes().put(month, costoTotal);
-                                                }
-                                            }
-                                        }
-                                    }
-                                    proyectos.stream()
-                                            .filter(proyecto -> auxId.equals(proyecto.getId()))
-                                            .findFirst()
-                                            .ifPresent(proyecto -> proyectoResponse.setNombreProyecto(proyecto.getNombre()));
-    
-                                    return proyectoResponse;
-                                }).collect(Collectors.toList());
-    
-                                return Mono.just(costosProyectoResponses);
-                            });
+                    return Mono.just(costosProyectoResponses);
                 });
     }
-     
+    
+    private CostosProyectoResponse buildProjectResponse(
+            HorasMensuales costoProyecto, 
+            String anio, 
+            List<Recurso> recursos, 
+            List<CostosMensuales> costosMensuales, 
+            List<Proyecto> proyectos) {
+    
+        CostosProyectoResponse proyectoResponse = new CostosProyectoResponse();
+    
+        for (int i = ENERO; i <= DICIEMBRE; i++) {
+            proyectoResponse.getCostoPorMes().put(String.valueOf(i), 0.0);
+        }
+        if (costoProyecto.getYears().containsKey(anio)) {
+            Map<String, Map<String, Integer>> yearMap = costoProyecto.getYears().get(anio);
+    
+            yearMap.forEach((month, workersMap) -> {
+                workersMap.forEach((workerId, hoursWorked) -> {
+                    Double costoMensual = calculateMonthlyCost(workerId, month, anio, recursos, costosMensuales);
+                    if (costoMensual != null) {
+                        Double costoTotal = hoursWorked * costoMensual;
+                        proyectoResponse.getCostoPorMes().merge(month, costoTotal, Double::sum);
+                    }
+                });
+            });
+        }
+        proyectos.stream()
+                .filter(proyecto -> proyecto.getId().equals(costoProyecto.getId()))
+                .findFirst()
+                .ifPresent(proyecto -> proyectoResponse.setNombreProyecto(proyecto.getNombre()));
+    
+        return proyectoResponse;
+    }
+    
+    private Double calculateMonthlyCost(
+            String workerId, 
+            String month, 
+            String anio, 
+            List<Recurso> recursos, 
+            List<CostosMensuales> costosMensuales) {
+    
+        String rolId = recursos.stream()
+                .filter(recurso -> recurso.getId().equals(workerId))
+                .map(Recurso::getRolId)
+                .findFirst()
+                .orElse(null);
+    
+        if (rolId == null) {
+                throw new RecursoNoEncontradoException();
+        }
+    
+        return costosMensuales.stream()
+                .filter(costo -> costo.getAnio().equals(anio) &&
+                                 costo.getMes().equals(month) &&
+                                 costo.getIdRol().equals(rolId))
+                .map(CostosMensuales::getCosto)
+                .findFirst()
+                .orElse(null);
+    }
+
 }

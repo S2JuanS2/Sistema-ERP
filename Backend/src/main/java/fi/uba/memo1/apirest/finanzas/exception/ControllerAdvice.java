@@ -49,5 +49,15 @@ public class ControllerAdvice {
                 .build();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
+
+    @ExceptionHandler(RecursoNoEncontradoException.class)
+    public ResponseEntity<ErrorResponse> RecursoNoEncontradoException(RecursoNoEncontradoException e) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .statusCode("404")
+                .status("Not Found")
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
     
 }
