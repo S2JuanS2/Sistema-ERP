@@ -2,6 +2,11 @@ package fi.uba.memo1.apirest.finanzas.service;
 
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesRequest;
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesResponse;
+import fi.uba.memo1.apirest.finanzas.dto.Horas;
+import fi.uba.memo1.apirest.finanzas.dto.HorasMensuales;
+import fi.uba.memo1.apirest.finanzas.dto.Proyecto;
+import fi.uba.memo1.apirest.finanzas.dto.CostosProyectoResponse;
+import fi.uba.memo1.apirest.finanzas.dto.Recurso;
 import fi.uba.memo1.apirest.finanzas.dto.Rol;
 import fi.uba.memo1.apirest.finanzas.dto.CostoRequest;
 import fi.uba.memo1.apirest.finanzas.exception.RolNoEncontradoException;
@@ -22,6 +27,8 @@ import reactor.core.scheduler.Schedulers;
 import java.time.LocalDate;
 import java.time.Year;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class CostosMensualesService implements ICostosMensualesService {
@@ -34,6 +41,14 @@ public class CostosMensualesService implements ICostosMensualesService {
     @Qualifier("rolesWebClient")
     private WebClient rolesWebClient;
     
+    @Autowired
+    @Qualifier("proyectosWebClient")
+    private WebClient proyectosWebClient;
+
+    @Autowired
+    @Qualifier("recursosWebClient")
+    private WebClient recursosWebClient;
+
     private final CostosMensualesRepository repository;
 
 
@@ -201,4 +216,91 @@ public class CostosMensualesService implements ICostosMensualesService {
             .subscribeOn(Schedulers.boundedElastic());
     }
 
+    @Override
+    public Mono<List<CostosProyectoResponse>> obtenerCostosDeProyectos(String anio) {
+    
+        Mono<List<CostosMensuales>> costosMensualesMono = Mono.just(repository.findAll());
+
+        Mono<List<Recurso>> recursosMono = recursosWebClient
+                .get()
+                .uri("/recursos")
+                .retrieve()
+                .bodyToFlux(Recurso.class)
+                .collectList();
+    
+        Mono<List<Proyecto>> proyectosMono = proyectosWebClient
+                .get()
+                .uri("/proyectos")
+                .retrieve()
+                .bodyToFlux(Proyecto.class)
+                .collectList();
+    
+        String url = String.format("https://squad9-2024-2c-1.onrender.com/api/projects");
+        
+        return proyectosWebClient
+                .get()
+                .uri(url)
+                .retrieve()
+                .bodyToMono(Horas.class)
+                .flatMap(response -> {
+                    List<HorasMensuales> costosProyectos = response.getProjects();
+    
+                    return Mono.zip(proyectosMono, recursosMono, costosMensualesMono)
+                            .flatMap(tuple -> {
+                                List<Proyecto> proyectos = tuple.getT1();
+                                List<Recurso> recursos = tuple.getT2();
+                                List<CostosMensuales> costosMensuales = tuple.getT3();
+    
+                                List<CostosProyectoResponse> costosProyectoResponses = costosProyectos.stream().map(costoProyecto -> {
+                                    CostosProyectoResponse proyectoResponse = new CostosProyectoResponse();
+                                    for (int i = ENERO; i <= DICIEMBRE; i++){
+                                        proyectoResponse.getCostoPorMes().put(String.valueOf(i), 0.0);
+                                    }
+                                    String auxId = costoProyecto.getId();
+                                    
+                                    if (costoProyecto.getYears().containsKey(anio)) {
+                                        Map<String, Map<String, Integer>> yearMap = costoProyecto.getYears().get(anio);
+    
+                                        for (Map.Entry<String, Map<String, Integer>> monthEntry : yearMap.entrySet()) {
+                                            String month = monthEntry.getKey();
+                                            Map<String, Integer> workersMap = monthEntry.getValue();
+    
+                                            for (Map.Entry<String, Integer> workerEntry : workersMap.entrySet()) {
+                                                String workerId = workerEntry.getKey();
+                                                
+                                                String rolId = recursos.stream()
+                                                        .filter(recurso -> recurso.getId().equals(workerId))
+                                                        .map(Recurso::getRolId)
+                                                        .findFirst()
+                                                        .orElse(null);
+    
+                                                Double costoMensual = costosMensuales.stream()
+                                                        .filter(costoMensualItem -> costoMensualItem.getAnio().equals(anio) &&
+                                                                costoMensualItem.getMes().equals(month) &&
+                                                                costoMensualItem.getIdRol().equals(rolId))
+                                                        .map(CostosMensuales::getCosto)
+                                                        .findFirst()
+                                                        .orElse(null);
+    
+                                                if (costoMensual != null) {
+                                                    Double hoursWorked = workerEntry.getValue().doubleValue();
+                                                    Double costoTotal = hoursWorked * costoMensual;
+                                                    proyectoResponse.getCostoPorMes().put(month, costoTotal);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    proyectos.stream()
+                                            .filter(proyecto -> auxId.equals(proyecto.getId()))
+                                            .findFirst()
+                                            .ifPresent(proyecto -> proyectoResponse.setNombreProyecto(proyecto.getNombre()));
+    
+                                    return proyectoResponse;
+                                }).collect(Collectors.toList());
+    
+                                return Mono.just(costosProyectoResponses);
+                            });
+                });
+    }
+     
 }
