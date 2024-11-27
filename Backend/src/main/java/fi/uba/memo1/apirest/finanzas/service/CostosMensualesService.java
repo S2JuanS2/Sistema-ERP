@@ -2,7 +2,7 @@ package fi.uba.memo1.apirest.finanzas.service;
 
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesRequest;
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesResponse;
-import fi.uba.memo1.apirest.finanzas.dto.Horas;
+import fi.uba.memo1.apirest.finanzas.dto.CargaDeHoras;
 import fi.uba.memo1.apirest.finanzas.dto.HorasMensuales;
 import fi.uba.memo1.apirest.finanzas.dto.Proyecto;
 import fi.uba.memo1.apirest.finanzas.dto.CostosProyectoResponse;
@@ -241,7 +241,7 @@ public class CostosMensualesService implements ICostosMensualesService {
                 .get()
                 .uri(url)
                 .retrieve()
-                .bodyToMono(Horas.class)
+                .bodyToMono(CargaDeHoras.class)
                 .flatMap(response -> {
                     List<HorasMensuales> costosProyectos = response.getProjects();
     

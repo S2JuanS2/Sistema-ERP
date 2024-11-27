@@ -10,6 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Horas {
+public class CargaDeHoras {
     private List<HorasMensuales> projects;
 }

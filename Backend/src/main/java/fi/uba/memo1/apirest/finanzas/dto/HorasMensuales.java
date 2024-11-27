@@ -14,6 +14,6 @@ import java.util.Map;
 @Getter
 @Setter
 public class HorasMensuales implements Serializable {
-    private String id;
-    private Map<String, Map<String, Map<String, Integer>>> years;
+    private String id; //del proyecto
+    private Map<String, Map<String, Map<String, Integer>>> years; //Año-Mes-WorkerId-Cant.Horas
 }
