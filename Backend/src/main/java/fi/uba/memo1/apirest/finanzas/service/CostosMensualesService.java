@@ -276,7 +276,7 @@ public class CostosMensualesService implements ICostosMensualesService {
             List<Proyecto> proyectos) {
     
         CostosProyectoResponse proyectoResponse = new CostosProyectoResponse();
-    
+
         for (int i = ENERO; i <= DICIEMBRE; i++) {
             proyectoResponse.getCostoPorMes().put(String.valueOf(i), 0.0);
         }
@@ -287,12 +287,18 @@ public class CostosMensualesService implements ICostosMensualesService {
                 workersMap.forEach((workerId, hoursWorked) -> {
                     Double costoMensual = calculateMonthlyCost(workerId, month, anio, recursos, costosMensuales);
                     if (costoMensual != null) {
-                        Double costoTotal = hoursWorked * costoMensual;
-                        proyectoResponse.getCostoPorMes().merge(month, costoTotal, Double::sum);
+                        Double costoTotalMes = hoursWorked * costoMensual;
+                        proyectoResponse.getCostoPorMes().merge(month, costoTotalMes, Double::sum);
                     }
                 });
             });
         }
+        Double costoTotalAño = 0.0;
+        for (Map.Entry<String, Double> entry : proyectoResponse.getCostoPorMes().entrySet()){
+                costoTotalAño += entry.getValue();
+        }
+        proyectoResponse.setCostoTotal(costoTotalAño);
+
         proyectos.stream()
                 .filter(proyecto -> proyecto.getId().equals(costoProyecto.getId()))
                 .findFirst()
