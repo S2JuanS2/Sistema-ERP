@@ -36,7 +36,7 @@ public class CostosMensualesService implements ICostosMensualesService {
 
     public static final int ENERO = 1;
     public static final int DICIEMBRE = 12;
-    public static final int ANIO_MINIMO = 1900;
+    public static final int ANIO_MINIMO = 2000;
 
     @Autowired
     @Qualifier("rolesWebClient")
