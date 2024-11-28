@@ -32,6 +32,9 @@ function obtenerFechasPosibles(data: costos[]): fechasPosibles[] {
     element.meses.sort((a, b) => MESES.indexOf(a) - MESES.indexOf(b));
   });
 
+  // Ordenar los años
+  mesesPosibles.sort((a, b) => parseInt(b.anio) - parseInt(a.anio));
+
   return mesesPosibles;
 }
 
