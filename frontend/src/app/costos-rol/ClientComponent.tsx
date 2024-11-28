@@ -25,8 +25,8 @@ export default function ClientComponent({
   fechasPosibles: fechasPosibles[];
 }) {
   const [period, setPeriod] = useState({
-    year: fechasPosibles[0].anio,
-    month: fechasPosibles[0].meses[0],
+    year: fechasPosibles[0] ? fechasPosibles[0].anio : new Date().getFullYear().toString(),
+    month: fechasPosibles[0] ? fechasPosibles[0].meses[0] : MESES[new Date().getMonth()],
   });
 
   const { toast } = useToast();
