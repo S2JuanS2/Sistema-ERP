@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CostosMensualesRepository extends JpaRepository<CostosMensuales, Long> {
+    boolean existsByIdRolAndAnioAndMes(String idRol, String anio, String mes);
 }
