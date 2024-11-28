@@ -2,6 +2,7 @@ import Navbar from '@/components/Navbar';
 import ClientComponent from './ClientComponent';
 import { FINANZAS_API, FINANZAS_COSTOS, MESES } from '@/constants';
 import { costos } from '@/types/costos';
+import { Suspense } from 'react';
 
 export type fechasPosibles = {
   anio: string;
@@ -60,7 +61,9 @@ export default async function Page() {
   return (
     <div>
       <Navbar />
-      <ClientComponent data={data} fechasPosibles={obtenerFechasPosibles(data)} />
+      <Suspense>
+        <ClientComponent data={data} fechasPosibles={obtenerFechasPosibles(data)} />
+      </Suspense>
     </div>
   );
 }

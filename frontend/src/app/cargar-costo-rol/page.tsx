@@ -2,6 +2,7 @@ import Navbar from '@/components/Navbar';
 import ClientComponent from './ClientComponent';
 import { FINANZAS_API, FINANZAS_COSTOS, ROLES_API } from '@/constants';
 import { roles } from '@/types/rolesAPI';
+import { Suspense } from 'react';
 
 export type rolesPosibles = {
   nombre: string;
@@ -45,7 +46,9 @@ export default async function page() {
   return (
     <div>
       <Navbar />
-      <ClientComponent rolesPosibles={roles} registeredData={data} />
+      <Suspense>
+        <ClientComponent rolesPosibles={roles} registeredData={data} />
+      </Suspense>
     </div>
   );
 }
