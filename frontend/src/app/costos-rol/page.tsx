@@ -39,7 +39,9 @@ function obtenerFechasPosibles(data: costos[]): fechasPosibles[] {
 }
 
 async function fetchData() {
-  const res = await fetch(FINANZAS_API + FINANZAS_COSTOS);
+  const res = await fetch(FINANZAS_API + FINANZAS_COSTOS, {
+    cache: 'no-store',
+  });
 
   if (!res.ok) {
     throw new Error('Failed to fetch data');

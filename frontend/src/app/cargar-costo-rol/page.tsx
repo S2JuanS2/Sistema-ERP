@@ -10,7 +10,9 @@ export type rolesPosibles = {
 };
 
 async function obtenerRolesPosibles() {
-  const response = await fetch(ROLES_API);
+  const response = await fetch(ROLES_API, {
+    cache: 'no-store',
+  });
   const data: roles[] = await response.json();
 
   const rolesPosibles: rolesPosibles[] = [];
@@ -31,7 +33,9 @@ async function obtenerRolesPosibles() {
 }
 
 async function fetchData() {
-  const res = await fetch(FINANZAS_API + FINANZAS_COSTOS);
+  const res = await fetch(FINANZAS_API + FINANZAS_COSTOS, {
+    cache: 'no-store',
+  });
 
   if (!res.ok) {
     throw new Error('Failed to fetch data');
