@@ -137,9 +137,9 @@ export default function ClientComponent({
               </DropdownMenu>
             </div>
           </div>
-          <Button>
-            <Link href={'/cargar-costo-rol'}>Cargar Costo</Link>
-          </Button>
+          <Link href={'/cargar-costo-rol'}>
+            <Button>Cargar Costo</Button>
+          </Link>
         </div>
         <div>
           <Table data={obtenerCostos()} mes={period.month} anio={period.year} />
