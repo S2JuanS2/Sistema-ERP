@@ -32,6 +32,9 @@ public class WebFluxConfig implements WebFluxConfigurer {
     @Value("${proyectos.api.base-url}")
     private String baseUrlProyectos;
 
+    @Value("${horas.api.base-url}")
+    private String baseUrlHoras;
+
     @Bean(name = "recursosWebClient")
     public WebClient getWebClientRecursos() {
         return getWebClient(baseUrlRecursos);
@@ -50,6 +53,11 @@ public class WebFluxConfig implements WebFluxConfigurer {
     @Bean(name = "proyectosWebClient")
     public WebClient getWebClientProyectos() {
         return getWebClient(baseUrlProyectos);
+    }
+
+    @Bean(name = "HorasWebClient")
+    public WebClient getWebClientSquad9() {
+        return getWebClient(baseUrlHoras);
     }
 
     private WebClient getWebClient(String baseUrl) {

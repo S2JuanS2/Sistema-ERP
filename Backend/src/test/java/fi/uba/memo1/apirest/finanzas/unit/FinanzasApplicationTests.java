@@ -192,7 +192,7 @@ class FinanzasApplicationTests {
         costoRequest.setCosto(1200);
 
         Mono<CostosMensualesResponse> response3 = webClient.put()
-                .uri(COSTOS_URL + "/actualizar-costo/" + costosMensualesResponse.getId())
+                .uri("/api/v1/finanzas/actualizar-costo/" + costosMensualesResponse.getId())
                 .body(Mono.just(costoRequest), CostoRequest.class)
                 .retrieve()
                 .bodyToMono(CostosMensualesResponse.class);
@@ -247,7 +247,7 @@ class FinanzasApplicationTests {
 
         WebClientResponseException exception = assertThrows(WebClientResponseException.class, () -> {
             Mono<String> response2 = webClient.put()
-                    .uri(COSTOS_URL + "/actualizar-costo/" + Objects.requireNonNull(costosMensualesResponse).getId())
+                    .uri("/api/v1/finanzas/actualizar-costo/" + Objects.requireNonNull(costosMensualesResponse).getId())
                     .body(Mono.just(costoRequest), CostoRequest.class)
                     .retrieve()
                     .bodyToMono(String.class);
