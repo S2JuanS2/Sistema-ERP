@@ -13,67 +13,6 @@ import Table from './Table';
 import { Proyectos } from '@/types/proyectosAPI';
 import { fetchWithTimeout } from '@/lib/fetchWithTimeout';
 
-const mockData: Proyectos = {
-  proyectos: [
-    {
-      nombreProyecto: 'Desarrollo Plataforma e-Commerce',
-      costoPorMes: {
-        '1': 3000,
-        '2': 3200,
-        '3': 3100,
-        '4': 3050,
-        '5': 3150,
-        '6': 3250,
-        '7': 3300,
-        '8': 3200,
-        '9': 3350,
-        '10': 3400,
-        '11': 3500,
-        '12': 3450,
-      },
-      costoTotal: 38950,
-    },
-    {
-      nombreProyecto: 'Sistema de Gestión de Inventarios',
-      costoPorMes: {
-        '1': 3000,
-        '2': 3050,
-        '3': 3000,
-        '4': 2970,
-        '5': 3010,
-        '6': 3100,
-        '7': 3050,
-        '8': 3120,
-        '9': 3200,
-        '10': 3300,
-        '11': 3350,
-        '12': 3400,
-      },
-
-      costoTotal: 37550,
-    },
-    {
-      nombreProyecto: 'Implementación Red de Ciberseguridad',
-      costoPorMes: {
-        '1': 3500,
-        '2': 3600,
-        '3': 3550,
-        '4': 3520,
-        '5': 3450,
-        '6': 3400,
-        '7': 3480,
-        '8': 3550,
-        '9': 3600,
-        '10': 3700,
-        '11': 3750,
-        '12': 3800,
-      },
-      costoTotal: 42900,
-    },
-  ],
-  costoTotalGlobal: 119400,
-};
-
 // Años posibles: desde el 2000 hasta la actualidad ordenados de forma descendente
 const years = Array.from(
   { length: new Date().getFullYear() - 1999 },
@@ -101,7 +40,12 @@ export default function ClientComponent() {
       setProjectsData(data);
     } catch (error) {
       console.error(error);
-      setProjectsData(mockData);
+
+      // Cargo datos de prueba, en caso de que en la demo todo salga mal
+      const response = await fetch('/mock/proyectos.json');
+      const data = await response.json();
+
+      setProjectsData(data[year]);
     }
   };
 
