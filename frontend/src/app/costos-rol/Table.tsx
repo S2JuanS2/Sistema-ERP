@@ -48,7 +48,7 @@ export default function Table({ data, mes, anio }: TableProps) {
       header: 'Acciones',
       cell: ({ row }) => (
         <button onClick={() => handleEditCosto(row.original)}>
-          <div className="bg-slate-200 p-2 w-fit rounded flex items-center text-gray-600 hover:text-black transition-colors">
+          <div className="bg-slate-200 p-2 rounded flex items-center text-gray-600 hover:text-black transition-colors">
             <Pencil className="mr-2" size={20} />
             <p className="font-semibold ">Editar</p>
           </div>

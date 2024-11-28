@@ -116,7 +116,9 @@ export default function ClientComponent() {
             </div>
           </div>
         </div>
-        <Table data={projectsData?.proyectos || []} period={period} />
+        <div className="w-full">
+          <Table data={projectsData?.proyectos || []} period={period} />
+        </div>
         <p className="text-lg font-bold">
           Costo total:
           <span className="ms-2 font-normal">${projectsData?.costoTotalGlobal || 0}</span>
