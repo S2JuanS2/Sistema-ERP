@@ -59,5 +59,15 @@ public class ControllerAdvice {
                 .build();
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
+
+    @ExceptionHandler(CostoEncontradoException.class)
+    public ResponseEntity<ErrorResponse> CostoEncontradoException(CostoEncontradoException e) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .statusCode("400")
+                .status("Bad Request")
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
     
 }

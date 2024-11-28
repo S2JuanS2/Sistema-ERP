@@ -15,6 +15,7 @@ import fi.uba.memo1.apirest.finanzas.exception.CostoMensualNegativoException;
 import fi.uba.memo1.apirest.finanzas.exception.CostoMensualNoEncontradoException;
 import fi.uba.memo1.apirest.finanzas.exception.FechaInvalidaException;
 import fi.uba.memo1.apirest.finanzas.exception.RecursoNoEncontradoException;
+import fi.uba.memo1.apirest.finanzas.exception.CostoEncontradoException;
 import fi.uba.memo1.apirest.finanzas.model.CostosMensuales;
 import fi.uba.memo1.apirest.finanzas.repository.CostosMensualesRepository;
 import jakarta.transaction.Transactional;
@@ -144,7 +145,6 @@ public class CostosMensualesService implements ICostosMensualesService {
                 .bodyToFlux(Rol.class)
                 .collectList();
 
-        // Buscar el primer rol que coincida con nombre y experiencia
         Mono<Rol> matchingRolMono = rolesMono.flatMap(roles ->
                 Mono.justOrEmpty(
                         roles.stream()
@@ -153,8 +153,11 @@ public class CostosMensualesService implements ICostosMensualesService {
                 )
         ).switchIfEmpty(Mono.error(new RolNoEncontradoException()));
 
-        // Procesar el rol encontrado o manejar si no se encuentra
         return matchingRolMono.flatMap(matchingRol -> {
+                
+            if(repository.existsByIdRolAndAnioAndMes(matchingRol.getId(), costos.getAnio(), costos.getMes())){
+                return Mono.error(new CostoEncontradoException());
+            }   
             LocalDate currentDate = LocalDate.now();
             CostosMensuales costosMensuales = new CostosMensuales();
             costosMensuales.setIdRol(matchingRol.getId());
@@ -170,7 +173,6 @@ public class CostosMensualesService implements ICostosMensualesService {
             }
             costosMensuales.setCosto(costos.getCosto());
 
-            // Guardar en un Scheduler dedicado
             return Mono.fromCallable(() -> repository.save(costosMensuales))
                     .subscribeOn(Schedulers.boundedElastic()) // Ejecuta en un hilo adecuado para tareas bloqueantes
                     .map(savedCostos ->
