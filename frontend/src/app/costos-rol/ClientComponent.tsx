@@ -37,7 +37,7 @@ export default function ClientComponent({
     const nombre = searchParams.get('nombre');
     const experiencia = searchParams.get('experiencia');
     const costo = searchParams.get('costo');
-    const editado = searchParams.get('editado');
+    const editado = searchParams.get('editado') === 'true';
 
     // * NOTA: Esto es solo para que se actualice en tiempo real, cuando se haga refresh solo se usa la obtenida de la API
     if (nombre && experiencia && costo) {
