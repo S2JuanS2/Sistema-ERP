@@ -354,10 +354,13 @@ export default function ClientComponent({ rolesPosibles, registeredData }: Clien
                 )}
               />
               <div className="flex justify-between w-full items-center">
-                <Button variant={'ghost'} className="font-semibold">
-                  <ArrowLeft className="h-4 w-4 shrink-0" />
-                  <Link href={'/costos-rol'}>Volver</Link>
-                </Button>
+                <Link href={'/costos-rol'}>
+                  <Button variant={'ghost'} className="font-semibold">
+                    <ArrowLeft className="h-4 w-4 shrink-0" />
+                    <p>Volver</p>
+                  </Button>
+                </Link>
+
                 <Button type="submit" className="bg-primary font-semibold">
                   {id ? 'Actualizar costo' : 'Cargar costo'}
                 </Button>
