@@ -65,7 +65,6 @@ export default async function Page() {
   const data = await fetchData();
   return (
     <div>
-      <Navbar />
       <Suspense>
         <ClientComponent data={data} fechasPosibles={obtenerFechasPosibles(data)} />
       </Suspense>

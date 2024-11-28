@@ -26,6 +26,7 @@ const finanzas: { title: string; href: string; description: string }[] = [
   },
 ];
 
+//! NAV ANTIGUA, COMO NOS GUSTARIA QUE SEA HAY QUE VER SI EL OTRO MODULO SE ADAPTA ~_~
 export default function Navbar() {
   return (
     <nav className="mt-2 py-2 px-4 flex items-center gap-8 border-b border-b-gray-300 bg-gray-100">
@@ -50,7 +51,7 @@ export default function Navbar() {
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuLink
-              className={`${navigationMenuTriggerStyle()} text-[1rem] font-semibold hover:cursor-pointer bg-gray-100 hover:bg-gray-200`}
+              className={`${navigationMenuTriggerStyle()} text-[16px] font-semibold hover:cursor-pointer bg-gray-100 hover:bg-gray-200`}
             >
               Proyectos
             </NavigationMenuLink>

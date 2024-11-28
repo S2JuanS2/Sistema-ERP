@@ -49,7 +49,6 @@ export default async function page() {
   const data = await fetchData();
   return (
     <div>
-      <Navbar />
       <Suspense>
         <ClientComponent rolesPosibles={roles} registeredData={data} />
       </Suspense>

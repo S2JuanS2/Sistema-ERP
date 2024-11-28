@@ -21,6 +21,7 @@ export const metadata: Metadata = {
 
 import 'react-datepicker/dist/react-datepicker.css';
 import SimpleFooter from '@/components/SimpleFooter';
+import SimpleNavbar from '@/components/SimpleNavbar';
 
 export default function RootLayout({
   children,
@@ -32,6 +33,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} flex flex-col antialiased h-100  min-h-screen`}
       >
+        <SimpleNavbar />
         <div className="flex-1">{children}</div>
         <SimpleFooter />
         <Toaster />
