@@ -174,7 +174,7 @@ export default function ClientComponent({ rolesPosibles, registeredData }: Clien
   };
 
   return (
-    <div>
+    <div className="mb-8">
       <h1 className="text-center text-4xl font-bold mt-8 mb-16">Cargar costo mensual</h1>
 
       <Card className="w-[500px] mx-auto">

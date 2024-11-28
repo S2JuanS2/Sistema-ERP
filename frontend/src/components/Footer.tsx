@@ -29,9 +29,6 @@ export default function Footer() {
             <p>Terminos y condiciones </p>
           </div>
         </div>
-        <div className="border-t border-t-gray-300 text-black py-4 text-center font-bold">
-          © 2024 Praxis Systems Argentina. Todos los derechos reservados.
-        </div>
       </footer>
     </div>
   );

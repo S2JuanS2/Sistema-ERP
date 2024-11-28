@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 import 'react-datepicker/dist/react-datepicker.css';
-import Footer from '@/components/Footer';
+import SimpleFooter from '@/components/SimpleFooter';
 
 export default function RootLayout({
   children,
@@ -33,7 +33,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} flex flex-col antialiased h-100  min-h-screen`}
       >
         <div className="flex-1">{children}</div>
-        <Footer />
+        <SimpleFooter />
         <Toaster />
       </body>
     </html>
