@@ -63,7 +63,7 @@ public class CostosMensualesController {
     @ApiResponse(responseCode = "200", description = "Costos mensuales actualizados")
     @ApiResponse(responseCode = "400", description = "Error en la actualización del costo mensual, el costo no puede ser negativo",  content = @Content(mediaType = "application/json", schema = @Schema(implementation = RolNoEncontradoException.class)))
     @PutMapping("/actualizar-costos")
-    public ResponseEntity<Mono<List<CostosMensualesResponse>>> actualizarCosto(@RequestBody Map<Long, CostoRequest> costosRequest){
+    public ResponseEntity<Mono<List<CostosMensualesResponse>>> actualizarCostos(@RequestBody Map<Long, CostoRequest> costosRequest){
         return ResponseEntity.status(HttpStatus.OK).body(service.updateAll(costosRequest));
     }
     
