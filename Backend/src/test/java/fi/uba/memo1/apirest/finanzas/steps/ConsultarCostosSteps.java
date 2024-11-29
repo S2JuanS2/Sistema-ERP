@@ -10,6 +10,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -39,20 +40,21 @@ public class ConsultarCostosSteps {
 
     @Given("I add a role cost with name {string}, experience {string}, cost {string}")
     public void iAddARoleCostWithNameExperienceCost(String name, String experience, String cost) {
+        List<CostosMensualesRequest> requestList = new ArrayList<>();
         CostosMensualesRequest request = new CostosMensualesRequest();
         request.setNombre(name);
         request.setExperiencia(experience);
         request.setCosto(Double.parseDouble(cost));
-
+        requestList.add(request);
         try {
-            CostosMensualesResponse costoObtenido = webClient.post()
+            ResponseEntity<List<CostosMensualesResponse>> costoObtenido = webClient.post()
                     .uri("/api/v1/finanzas/cargar-costo")
-                    .body(Mono.just(request), CostosMensualesRequest.class)
+                    .body(Mono.just(requestList), new ParameterizedTypeReference<List<CostosMensualesResponse>>() {})
                     .retrieve()
-                    .bodyToMono(CostosMensualesResponse.class)
+                    .toEntity(new ParameterizedTypeReference<List<CostosMensualesResponse>>() {})
                     .block();
 
-            this.costosAgregados.add(costoObtenido);
+            this.costosAgregados.add(costoObtenido.getBody().get(costoObtenido.getBody().size() -1));
         } catch (WebClientResponseException e) {
             this.exception = e;
         }

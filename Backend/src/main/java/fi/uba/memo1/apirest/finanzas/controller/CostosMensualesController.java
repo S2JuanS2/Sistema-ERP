@@ -46,7 +46,7 @@ public class CostosMensualesController {
     @ApiResponse(responseCode = "201", description = "Costo mensual cargado")
     @ApiResponse(responseCode = "404", description = "Error en la carga del costo mensual", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RolNoEncontradoException.class)))
     @PostMapping("/cargar-costo")
-    public ResponseEntity<Mono<CostosMensualesResponse>> cargarCosto(@RequestBody CostosMensualesRequest costosMensualesRequest) {
+    public ResponseEntity<Mono<List<CostosMensualesResponse>>> cargarCosto(@RequestBody List<CostosMensualesRequest> costosMensualesRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(costosMensualesRequest));
     }
 

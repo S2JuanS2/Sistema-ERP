@@ -9,11 +9,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,64 +39,80 @@ class FinanzasApplicationTests {
 
     @Test
     void cargarCostoExitosamente() {
+        List<CostosMensualesRequest> requestList = new ArrayList<>();
         CostosMensualesRequest request = new CostosMensualesRequest();
         request.setCosto(1000);
         request.setNombre("Desarrollador");
         request.setExperiencia("Senior");
-
-        Mono<CostosMensualesResponse> response = webClient.post()
+        requestList.add(request);
+    
+        ParameterizedTypeReference<List<CostosMensualesResponse>> responseType =
+                new ParameterizedTypeReference<List<CostosMensualesResponse>>() {};
+    
+        List<CostosMensualesResponse> responseList = webClient.post()
                 .uri(CARGAR_COSTOS_URL)
-                .body(Mono.just(request), CostosMensualesRequest.class)
+                .bodyValue(requestList)
                 .retrieve()
-                .bodyToMono(CostosMensualesResponse.class);
-
-        CostosMensualesResponse costosMensualesResponse = response.block();
-        assertNotNull(costosMensualesResponse);
+                .bodyToMono(responseType)
+                .block();
+    
+        assertNotNull(responseList);
+        assertEquals(1, responseList.size());
+        CostosMensualesResponse costosMensualesResponse = responseList.get(0);
         assertEquals(1000, costosMensualesResponse.getCosto());
     }
+    
 
     @Test
     void noSePuedeCargarCostoConNombreInexistente() {
+        List<CostosMensualesRequest> requestList = new ArrayList<>();
         CostosMensualesRequest request = new CostosMensualesRequest();
         request.setCosto(1000);
         request.setNombre("Administrador");
         request.setExperiencia("Senior");
-
+        requestList.add(request);
+    
         WebClientResponseException exception = assertThrows(WebClientResponseException.class, () -> {
-            Mono<String> response = webClient.post()
+            webClient.post()
                     .uri(CARGAR_COSTOS_URL)
-                    .body(Mono.just(request), CostosMensualesRequest.class)
+                    .bodyValue(requestList)
                     .retrieve()
-                    .bodyToMono(String.class);
-
-            response.block();
+                    .bodyToMono(String.class)
+                    .block();
         });
-
+    
         assertEquals(404, exception.getStatusCode().value());
-        assertEquals("No se encontró un rol con nombre y experiencia coincidentes", Objects.requireNonNull(exception.getResponseBodyAs(ErrorResponse.class)).getMessage());
+        ErrorResponse errorResponse = exception.getResponseBodyAs(ErrorResponse.class);
+        assertNotNull(errorResponse);
+        assertEquals("No se encontró un rol con nombre y experiencia coincidentes", errorResponse.getMessage());
     }
+    
 
 
     @Test
     void noSePuedeCargarCostoConExperienciaInexistente() {
+        List<CostosMensualesRequest> requestList = new ArrayList<>();
         CostosMensualesRequest request = new CostosMensualesRequest();
         request.setCosto(1000);
         request.setNombre("Desarrollador");
         request.setExperiencia("Entry");
-
+        requestList.add(request);
+    
         WebClientResponseException exception = assertThrows(WebClientResponseException.class, () -> {
-            Mono<String> response = webClient.post()
+            webClient.post()
                     .uri(CARGAR_COSTOS_URL)
-                    .body(Mono.just(request), CostosMensualesRequest.class)
+                    .bodyValue(requestList)
                     .retrieve()
-                    .bodyToMono(String.class);
-
-            response.block();
+                    .bodyToMono(String.class)
+                    .block();
         });
-
+    
         assertEquals(404, exception.getStatusCode().value());
-        assertEquals("No se encontró un rol con nombre y experiencia coincidentes", Objects.requireNonNull(exception.getResponseBodyAs(ErrorResponse.class)).getMessage());
+        ErrorResponse errorResponse = exception.getResponseBodyAs(ErrorResponse.class);
+        assertNotNull(errorResponse);
+        assertEquals("No se encontró un rol con nombre y experiencia coincidentes", errorResponse.getMessage());
     }
+    
 
     @Test
     void seAgregaElCostoALaTablaCorrectamente() {
@@ -107,14 +125,16 @@ class FinanzasApplicationTests {
         List<CostosMensuales> costos = response.block();
         int count = Objects.requireNonNull(costos).size();
 
+        List<CostosMensualesRequest> requestList = new ArrayList<>();
         CostosMensualesRequest request = new CostosMensualesRequest();
         request.setCosto(1000);
         request.setNombre("Desarrollador");
         request.setExperiencia("Senior");
+        requestList.add(request);
 
         Mono<String> response2 = webClient.post()
                 .uri(CARGAR_COSTOS_URL)
-                .body(Mono.just(request), CostosMensualesRequest.class)
+                .body(Mono.just(requestList), new ParameterizedTypeReference<List<CostosMensualesResponse>>() {})
                 .retrieve()
                 .bodyToMono(String.class);
 
@@ -133,18 +153,23 @@ class FinanzasApplicationTests {
 
     @Test
     void seBuscaElIDCorrectamente() {
+        List<CostosMensualesRequest> requestList = new ArrayList<>();
         CostosMensualesRequest request = new CostosMensualesRequest();
         request.setCosto(1000);
         request.setNombre("Desarrollador");
         request.setExperiencia("Senior");
+        requestList.add(request);
 
-        Mono<CostosMensualesResponse> response2 = webClient.post()
+        ParameterizedTypeReference<List<CostosMensualesResponse>> responseType =
+                new ParameterizedTypeReference<List<CostosMensualesResponse>>() {};
+
+        Mono<List<CostosMensualesResponse>> response2 = webClient.post()
                 .uri(CARGAR_COSTOS_URL)
-                .body(Mono.just(request), CostosMensualesRequest.class)
+                .body(Mono.just(requestList), new ParameterizedTypeReference<List<CostosMensualesResponse>>() {})
                 .retrieve()
-                .bodyToMono(CostosMensualesResponse.class);
+                .bodyToMono(responseType);
 
-        CostosMensualesResponse costosMensualesResponse = response2.block();
+        CostosMensualesResponse costosMensualesResponse = response2.block().get(response2.block().size()-1);
 
         Mono<List<CostosMensuales>> response = webClient.get()
                 .uri(COSTOS_URL + "/" + Objects.requireNonNull(costosMensualesResponse).getId().toString())
@@ -175,18 +200,23 @@ class FinanzasApplicationTests {
 
     @Test
     void seModificaElCostoCorrectamente() {
+        List<CostosMensualesRequest> requestList = new ArrayList<>();
         CostosMensualesRequest request = new CostosMensualesRequest();
         request.setCosto(1000);
         request.setNombre("Desarrollador");
         request.setExperiencia("Senior");
+        requestList.add(request);
 
-        Mono<CostosMensualesResponse> response2 = webClient.post()
+        ParameterizedTypeReference<List<CostosMensualesResponse>> responseType =
+                new ParameterizedTypeReference<List<CostosMensualesResponse>>() {};
+
+        Mono<List<CostosMensualesResponse>> response2 = webClient.post()
                 .uri(CARGAR_COSTOS_URL)
-                .body(Mono.just(request), CostosMensualesRequest.class)
+                .body(Mono.just(requestList), new ParameterizedTypeReference<List<CostosMensualesResponse>>() {})
                 .retrieve()
-                .bodyToMono(CostosMensualesResponse.class);
+                .bodyToMono(responseType);
 
-        CostosMensualesResponse costosMensualesResponse = response2.block();
+        CostosMensualesResponse costosMensualesResponse = response2.block().get(response2.block().size()-1);
 
         CostoRequest costoRequest = new CostoRequest();
         costoRequest.setCosto(1200);
@@ -206,15 +236,17 @@ class FinanzasApplicationTests {
 
     @Test
     void noSePuedeCrearCostoConValorNegativo() {
+        List<CostosMensualesRequest> requestList = new ArrayList<>();
         CostosMensualesRequest request = new CostosMensualesRequest();
         request.setCosto(-100);
         request.setNombre("Desarrollador");
         request.setExperiencia("Senior");
+        requestList.add(request);
 
         WebClientResponseException exception = assertThrows(WebClientResponseException.class, () -> {
             Mono<String> response = webClient.post()
                     .uri(CARGAR_COSTOS_URL)
-                    .body(Mono.just(request), CostosMensualesRequest.class)
+                    .body(Mono.just(requestList), new ParameterizedTypeReference<List<CostosMensualesResponse>>() {})
                     .retrieve()
                     .bodyToMono(String.class);
 
@@ -228,19 +260,23 @@ class FinanzasApplicationTests {
 
     @Test
     void noSePuedeModificarCostoConValorNegativo() {
-
+        List<CostosMensualesRequest> requestList = new ArrayList<>();
         CostosMensualesRequest request = new CostosMensualesRequest();
         request.setCosto(1000);
         request.setNombre("Desarrollador");
         request.setExperiencia("Senior");
+        requestList.add(request);
 
-        Mono<CostosMensualesResponse> response = webClient.post()
+        ParameterizedTypeReference<List<CostosMensualesResponse>> responseType =
+                new ParameterizedTypeReference<List<CostosMensualesResponse>>() {};
+
+        Mono<List<CostosMensualesResponse>> response = webClient.post()
                 .uri(CARGAR_COSTOS_URL)
-                .body(Mono.just(request), CostosMensualesRequest.class)
+                .body(Mono.just(requestList), new ParameterizedTypeReference<List<CostosMensualesResponse>>() {})
                 .retrieve()
-                .bodyToMono(CostosMensualesResponse.class);
+                .bodyToMono(responseType);
 
-        CostosMensualesResponse costosMensualesResponse = response.block();
+        CostosMensualesResponse costosMensualesResponse = response.block().get(response.block().size() -1);
 
         CostoRequest costoRequest = new CostoRequest();
         costoRequest.setCosto(-500);

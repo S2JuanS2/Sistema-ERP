@@ -14,7 +14,7 @@ public interface ICostosMensualesService {
 
     Mono<CostosMensualesResponse> findById(Long id);
 
-    Mono<CostosMensualesResponse> save(CostosMensualesRequest costos);
+    Mono<List<CostosMensualesResponse>> save(List<CostosMensualesRequest> costos);
 
     Mono<CostosMensualesResponse> update(Long id, CostoRequest costoRequest);
 
