@@ -10,11 +10,14 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,7 +29,7 @@ public class CargarCostosSteps {
     private String experience;
     private String month;
     private String year;
-    private ResponseEntity<CostosMensualesResponse> response;
+    private ResponseEntity<List<CostosMensualesResponse>> response;
     private WebClientResponseException exception;
 
     private WebClient webClient;
@@ -62,6 +65,7 @@ public class CargarCostosSteps {
 
     @When("I POST to the route {string}")
     public void iPOSTToTheRoute(String route) {
+        List<CostosMensualesRequest> requestList = new ArrayList<>();
         CostosMensualesRequest request = new CostosMensualesRequest();
         request.setNombre(name);
         request.setExperiencia(experience);
@@ -70,18 +74,19 @@ public class CargarCostosSteps {
             request.setMes(month);
             request.setAnio(year);
         }
+        requestList.add(request);
 
         try {
-            this.response = webClient.post()
-                    .uri(route)
-                    .body(Mono.just(request), CostosMensualesRequest.class)
-                    .retrieve()
-                    .toEntity(CostosMensualesResponse.class)
-                    .block();
+        this.response = webClient.post()
+                .uri(route)
+                .body(Mono.just(requestList), new ParameterizedTypeReference<List<CostosMensualesResponse>>() {})
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<CostosMensualesResponse>>() {})
+                .block();
 
-        } catch (WebClientResponseException e) {
-            this.exception = e;
-        }
+    } catch (WebClientResponseException e) {
+        this.exception = e;
+    }
 
     }
 
@@ -111,7 +116,7 @@ public class CargarCostosSteps {
         if (this.exception != null) {
             return;
         }
-        CostosMensualesResponse costoObtenido = this.response.getBody();
+        CostosMensualesResponse costoObtenido = this.response.getBody().get(this.response.getBody().size() -1);
 
         assertEquals(this.cost, Objects.requireNonNull(costoObtenido).getCosto());
     }
