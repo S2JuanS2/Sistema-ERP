@@ -30,6 +30,7 @@ import reactor.core.scheduler.Schedulers;
 import java.time.LocalDate;
 import java.time.Year;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -191,7 +192,6 @@ public class CostosMensualesService implements ICostosMensualesService {
         });
     }
 
-
     @Transactional
     @Override
     public Mono<CostosMensualesResponse> update(Long id, CostoRequest costoRequest) {
@@ -227,6 +227,57 @@ public class CostosMensualesService implements ICostosMensualesService {
                     })
             )
             .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    @Transactional
+    @Override
+    public Mono<List<CostosMensualesResponse>> updateAll(Map<Long, CostoRequest> costosRequest) {
+    
+        boolean hayCostosNegativos = costosRequest.values().stream()
+                .anyMatch(costoRequest -> costoRequest.getCosto() < 0);
+    
+        if (hayCostosNegativos) {
+            return Mono.error(new CostoMensualNegativoException());
+        }
+    
+        return rolesWebClient.get()
+                .uri("/roles")
+                .retrieve()
+                .bodyToFlux(Rol.class)
+                .collectList()
+                .flatMap(roles -> {
+                    List<Mono<CostosMensualesResponse>> updates = costosRequest.entrySet().stream()
+                            .map(entry -> {
+                                Long id = entry.getKey();
+                                CostoRequest costoRequest = entry.getValue();
+    
+                                return Mono.fromCallable(() -> repository.findById(id)
+                                        .orElseThrow(CostoMensualNoEncontradoException::new))
+                                        .flatMap(costoExistente -> {
+                                            Rol matchingRol = roles.stream()
+                                                    .filter(rol -> rol.getId().equals(costoExistente.getIdRol()))
+                                                    .findFirst()
+                                                    .orElseThrow(RolNoEncontradoException::new);
+    
+                                            costoExistente.setCosto(costoRequest.getCosto());
+                                            return Mono.fromCallable(() -> repository.save(costoExistente))
+                                                    .map(costoActualizado -> new CostosMensualesResponse(
+                                                            costoActualizado.getId(),
+                                                            matchingRol,
+                                                            costoActualizado.getMes(),
+                                                            costoActualizado.getAnio(),
+                                                            costoActualizado.getCosto()
+                                                    ));
+                                        });
+                            })
+                            .toList();
+                            
+                    return Mono.zip(updates, results -> 
+                            Arrays.stream(results)
+                                  .map(result -> (CostosMensualesResponse) result)
+                                  .toList());
+                })
+                .subscribeOn(Schedulers.boundedElastic());
     }
 
     @Override
