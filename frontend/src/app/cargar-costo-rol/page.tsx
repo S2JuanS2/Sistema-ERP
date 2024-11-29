@@ -1,8 +1,8 @@
-import Navbar from '@/components/Navbar';
 import ClientComponent from './ClientComponent';
-import { FINANZAS_API, FINANZAS_COSTOS, ROLES_API } from '@/constants';
+import { ROLES_API } from '@/constants';
 import { roles } from '@/types/rolesAPI';
 import { Suspense } from 'react';
+import { RolesProvider } from '../context/RolesContext';
 
 export type rolesPosibles = {
   nombre: string;
@@ -32,26 +32,13 @@ async function obtenerRolesPosibles() {
   return rolesPosibles;
 }
 
-async function fetchData() {
-  const res = await fetch(FINANZAS_API + FINANZAS_COSTOS, {
-    cache: 'no-store',
-  });
-
-  if (!res.ok) {
-    throw new Error('Failed to fetch data');
-  }
-
-  return res.json();
-}
-
 export default async function page() {
   const roles = await obtenerRolesPosibles();
-  const data = await fetchData();
   return (
-    <div>
+    <RolesProvider>
       <Suspense>
-        <ClientComponent rolesPosibles={roles} registeredData={data} />
+        <ClientComponent rolesPosibles={roles} />
       </Suspense>
-    </div>
+    </RolesProvider>
   );
 }

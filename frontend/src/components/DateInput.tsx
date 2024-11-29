@@ -18,7 +18,7 @@ export const DateInput = forwardRef<HTMLButtonElement, DateInputProps>(
       onClick={onClick}
       ref={ref}
       disabled={disabled}
-      className="w-[100%] justify-start text-left font-normal"
+      className="w-full justify-start text-left font-normal"
       type="button"
     >
       <CalendarIcon className="mr-2 h-4 w-4" />

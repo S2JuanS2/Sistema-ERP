@@ -8,29 +8,69 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MESES } from '@/constants';
-import { costos } from '@/types/costos';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, UserPlus } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { fechasPosibles } from './page';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import Table, { costosTableData } from './Table';
+import { useRoles } from '../context/RolesContext';
+import { costos } from '@/types/costos';
 
-export default function ClientComponent({
-  data,
-  fechasPosibles,
-}: {
-  data: costos[];
-  fechasPosibles: fechasPosibles[];
-}) {
+export type fechasPosibles = {
+  anio: string;
+  meses: string[];
+};
+
+function obtenerFechasPosibles(data: costos[]): fechasPosibles[] {
+  // Meses posibles de cada año
+  const mesesPosibles: fechasPosibles[] = [];
+  data.forEach((costo: costos) => {
+    const anioYaRegistrado = mesesPosibles.find((element) => element.anio === costo.anio);
+    const mesYaRegistrado = anioYaRegistrado?.meses.find(
+      (element) => element === MESES[parseInt(costo.mes) - 1]
+    );
+
+    if (anioYaRegistrado) {
+      if (!mesYaRegistrado) {
+        anioYaRegistrado.meses.push(MESES[parseInt(costo.mes) - 1]);
+      }
+    } else {
+      mesesPosibles.push({ anio: costo.anio, meses: [MESES[parseInt(costo.mes) - 1]] });
+    }
+  });
+
+  // Ordenar los meses
+  mesesPosibles.forEach((element) => {
+    element.meses.sort((a, b) => MESES.indexOf(a) - MESES.indexOf(b));
+  });
+
+  // Ordenar los años
+  mesesPosibles.sort((a, b) => parseInt(b.anio) - parseInt(a.anio));
+
+  return mesesPosibles;
+}
+
+export default function ClientComponent() {
+  const { data } = useRoles();
+  const fechasPosibles = useMemo(() => {
+    return obtenerFechasPosibles(data);
+  }, [data]);
+
   const [period, setPeriod] = useState({
-    year: fechasPosibles[0] ? fechasPosibles[0].anio : new Date().getFullYear().toString(),
-    month: fechasPosibles[0] ? fechasPosibles[0].meses[0] : MESES[new Date().getMonth()],
+    year: new Date().getFullYear().toString(),
+    month: MESES[new Date().getMonth()],
   });
 
   const { toast } = useToast();
   const searchParams = useSearchParams();
+
+  useEffect(() => {
+    setPeriod({
+      year: fechasPosibles[0] ? fechasPosibles[0].anio : new Date().getFullYear().toString(),
+      month: fechasPosibles[0] ? fechasPosibles[0].meses[0] : MESES[new Date().getMonth()],
+    });
+  }, [data, fechasPosibles]);
 
   useEffect(() => {
     const id = searchParams.get('id');
@@ -40,6 +80,7 @@ export default function ClientComponent({
     const editado = searchParams.get('editado') === 'true';
 
     // * NOTA: Esto es solo para que se actualice en tiempo real, cuando se haga refresh solo se usa la obtenida de la API
+    //! NOTA2: Esto ya no deberia ser util en la neuva implementación ya que usa context.
     if (nombre && experiencia && costo) {
       if (editado) {
         const index = data.findIndex((costo) => costo.id.toString() === id);
@@ -138,7 +179,10 @@ export default function ClientComponent({
             </div>
           </div>
           <Link href={'/cargar-costo-rol'}>
-            <Button>Cargar Costo</Button>
+            <Button className="font-semibold">
+              <UserPlus size={20} />
+              Cargar Costo
+            </Button>
           </Link>
         </div>
         <div>

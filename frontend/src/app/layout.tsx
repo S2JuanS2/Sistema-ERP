@@ -22,8 +22,9 @@ export const metadata: Metadata = {
 import 'react-datepicker/dist/react-datepicker.css';
 import SimpleFooter from '@/components/SimpleFooter';
 import SimpleNavbar from '@/components/SimpleNavbar';
+import { RolesProvider } from './context/RolesContext';
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -34,7 +35,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} flex flex-col antialiased h-100  min-h-screen`}
       >
         <SimpleNavbar />
-        <div className="flex-1">{children}</div>
+        <RolesProvider>
+          <div className="flex-1">{children}</div>
+        </RolesProvider>
         <SimpleFooter />
         <Toaster />
       </body>
