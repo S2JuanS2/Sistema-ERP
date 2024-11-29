@@ -118,77 +118,78 @@ public class CostosMensualesService implements ICostosMensualesService {
                 );
     }
 
+    @Transactional
+    @Override
+    public Mono<List<CostosMensualesResponse>> save(List<CostosMensualesRequest> costosList) {
+        Mono<List<Rol>> rolesMono = rolesWebClient
+                .get()
+                .uri("/roles")
+                .retrieve()
+                .bodyToFlux(Rol.class)
+                .collectList();
 
-public Mono<List<CostosMensualesResponse>> save(List<CostosMensualesRequest> costosList) {
-    Mono<List<Rol>> rolesMono = rolesWebClient
-            .get()
-            .uri("/roles")
-            .retrieve()
-            .bodyToFlux(Rol.class)
-            .collectList();
+        return rolesMono.flatMap(roles -> {
 
-    return rolesMono.flatMap(roles -> {
+                List<CostosMensuales> costosValidados = new ArrayList<>();
 
-        List<CostosMensuales> costosValidados = new ArrayList<>();
-
-        for (CostosMensualesRequest costos : costosList) {
-                
-                // <--- VALIDACIONES --->
-            if (!(costos.getAnio() == null && costos.getMes() == null)) {
-                int anio = Integer.parseInt(costos.getAnio());
-                int anioActual = Year.now().getValue();
-                if (anio < ANIO_MINIMO || anio > anioActual) {
-                    return Mono.error(new FechaInvalidaException());
+                for (CostosMensualesRequest costos : costosList) {
+                        
+                        // <--- VALIDACIONES --->
+                if (!(costos.getAnio() == null && costos.getMes() == null)) {
+                        int anio = Integer.parseInt(costos.getAnio());
+                        int anioActual = Year.now().getValue();
+                        if (anio < ANIO_MINIMO || anio > anioActual) {
+                        return Mono.error(new FechaInvalidaException());
+                        }
+                        int mes = Integer.parseInt(costos.getMes());
+                        if (mes < ENERO || mes > DICIEMBRE) {
+                        return Mono.error(new FechaInvalidaException());
+                        }
                 }
-                int mes = Integer.parseInt(costos.getMes());
-                if (mes < ENERO || mes > DICIEMBRE) {
-                    return Mono.error(new FechaInvalidaException());
+                if (costos.getCosto() < 0) {
+                        return Mono.error(new CostoMensualNegativoException());
                 }
-            }
-            if (costos.getCosto() < 0) {
-                return Mono.error(new CostoMensualNegativoException());
-            }
-            Rol matchingRol = roles.stream()
-                    .filter(rol -> costos.getNombre().equalsIgnoreCase(rol.getNombre()) &&
-                                   costos.getExperiencia().equalsIgnoreCase(rol.getExperiencia()))
-                    .findFirst()
-                    .orElseThrow(RolNoEncontradoException::new);
+                Rol matchingRol = roles.stream()
+                        .filter(rol -> costos.getNombre().equalsIgnoreCase(rol.getNombre()) &&
+                                        costos.getExperiencia().equalsIgnoreCase(rol.getExperiencia()))
+                        .findFirst()
+                        .orElseThrow(RolNoEncontradoException::new);
 
-            if (repository.existsByIdRolAndAnioAndMes(matchingRol.getId(), costos.getAnio(), costos.getMes())) {
-                return Mono.error(new CostoEncontradoException());
-            }
+                if (repository.existsByIdRolAndAnioAndMes(matchingRol.getId(), costos.getAnio(), costos.getMes())) {
+                        return Mono.error(new CostoEncontradoException());
+                }
 
-            // <--- PREPARACIÓN PARA EL GUARDADO --->
-            LocalDate currentDate = LocalDate.now();
-            CostosMensuales costosMensuales = new CostosMensuales();
-            costosMensuales.setIdRol(matchingRol.getId());
-            costosMensuales.setMes(costos.getMes() != null ? costos.getMes() : String.valueOf(currentDate.getMonthValue()));
-            costosMensuales.setAnio(costos.getAnio() != null ? costos.getAnio() : String.valueOf(currentDate.getYear()));
-            costosMensuales.setCosto(costos.getCosto());
-            costosValidados.add(costosMensuales);
-        }
+                // <--- PREPARACIÓN PARA EL GUARDADO --->
+                LocalDate currentDate = LocalDate.now();
+                CostosMensuales costosMensuales = new CostosMensuales();
+                costosMensuales.setIdRol(matchingRol.getId());
+                costosMensuales.setMes(costos.getMes() != null ? costos.getMes() : String.valueOf(currentDate.getMonthValue()));
+                costosMensuales.setAnio(costos.getAnio() != null ? costos.getAnio() : String.valueOf(currentDate.getYear()));
+                costosMensuales.setCosto(costos.getCosto());
+                costosValidados.add(costosMensuales);
+                }
 
-        // <-- GUARDADO DE LA COLECCIÓN COMPLETA -->
-        return Mono.fromCallable(() -> repository.saveAll(costosValidados))
-                .subscribeOn(Schedulers.boundedElastic())
-                .map(savedCostos -> savedCostos.stream()
-                        .map(savedCosto -> {
-                            Rol matchingRol = roles.stream()
-                                    .filter(rol -> rol.getId().equals(savedCosto.getIdRol()))
-                                    .findFirst()
-                                    .orElseThrow();
-                            return new CostosMensualesResponse(
-                                    savedCosto.getId(),
-                                    matchingRol,
-                                    savedCosto.getMes(),
-                                    savedCosto.getAnio(),
-                                    savedCosto.getCosto()
-                            );
-                        })
-                        .collect(Collectors.toList())
-                );
-    });
-}
+                // <-- GUARDADO DE LA COLECCIÓN COMPLETA -->
+                return Mono.fromCallable(() -> repository.saveAll(costosValidados))
+                        .subscribeOn(Schedulers.boundedElastic())
+                        .map(savedCostos -> savedCostos.stream()
+                                .map(savedCosto -> {
+                                Rol matchingRol = roles.stream()
+                                        .filter(rol -> rol.getId().equals(savedCosto.getIdRol()))
+                                        .findFirst()
+                                        .orElseThrow();
+                                return new CostosMensualesResponse(
+                                        savedCosto.getId(),
+                                        matchingRol,
+                                        savedCosto.getMes(),
+                                        savedCosto.getAnio(),
+                                        savedCosto.getCosto()
+                                );
+                                })
+                                .collect(Collectors.toList())
+                        );
+        });
+    }
 
 
     @Transactional
