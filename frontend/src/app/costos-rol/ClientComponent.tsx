@@ -136,35 +136,35 @@ export default function ClientComponent() {
             </div>
           </div>
           <div className="flex  gap-4">
-            <Link
-              href={{
-                pathname: '/cargar-costo-rol',
-                query: {
-                  mes: period.month,
-                  anio: period.year,
-                },
-              }}
-            >
-              <Button className="font-semibold">
+            <Button className="font-semibold" asChild>
+              <Link
+                href={{
+                  pathname: '/cargar-costo-rol',
+                  query: {
+                    mes: period.month,
+                    anio: period.year,
+                  },
+                }}
+              >
                 <UserRoundPlusIcon size={20} />
                 Cargar Costos
-              </Button>
-            </Link>
-            <Link
-              href={{
-                pathname: '/cargar-costo-rol',
-                query: {
-                  mes: period.month,
-                  anio: period.year,
-                  editar: true,
-                },
-              }}
-            >
-              <Button className="font-semibold">
+              </Link>
+            </Button>
+            <Button className="font-semibold" asChild>
+              <Link
+                href={{
+                  pathname: '/cargar-costo-rol',
+                  query: {
+                    mes: period.month,
+                    anio: period.year,
+                    editar: true,
+                  },
+                }}
+              >
                 <UserRoundPen size={20} />
                 Editar costos
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
         <div>

@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react';
 import Table from './Table';
 import { Proyectos } from '@/types/proyectosAPI';
 import { fetchWithTimeout } from '@/lib/fetchWithTimeout';
+import { toast, useToast } from '@/hooks/use-toast';
 
 // Años posibles: desde el 2000 hasta la actualidad ordenados de forma descendente
 const years = Array.from(
@@ -32,6 +33,7 @@ export default function ClientComponent() {
     to: 'Diciembre',
   });
   const [projectsData, setProjectsData] = useState<Proyectos>();
+  const toast = useToast();
 
   const fetchData = async (year: string | number) => {
     try {
@@ -40,7 +42,11 @@ export default function ClientComponent() {
       setProjectsData(data);
     } catch (error) {
       console.error(error);
-      // TODO: Toast lanzando error y no usando mock?
+      toast.toast({
+        title: 'Error',
+        description: 'No se pudieron cargar los datos de los proyectos, cargando datos de prueba',
+        variant: 'destructive',
+      });
 
       // Cargo datos de prueba, en caso de que en la demo todo salga mal
       const response = await fetch('/mock/proyectos.json');
