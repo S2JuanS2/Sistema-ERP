@@ -1,7 +1,6 @@
 'use client';
 
 import { DataTable } from '@/components/ui/data-table';
-import { Mes } from '@/types/enums';
 import { ColumnDef } from '@tanstack/react-table';
 import { Pencil } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -15,19 +14,13 @@ export type costosTableData = {
 
 type TableProps = {
   data: costosTableData[];
-  mes: string;
-  anio: string;
 };
 
-export default function Table({ data, mes, anio }: TableProps) {
+export default function Table({ data }: TableProps) {
   const router = useRouter();
 
   function handleEditCosto(actual: costosTableData) {
-    router.push(
-      `/cargar-costo-rol?id=${actual.id}&rol=${actual.rol}&experiencia=${actual.seniority}&costo=${
-        actual.costo
-      }&mes=${Mes[mes as keyof typeof Mes]}&anio=${anio}`
-    );
+    router.push('/editar-costo-rol?id=' + actual.id);
   }
 
   const columns: ColumnDef<costosTableData>[] = [

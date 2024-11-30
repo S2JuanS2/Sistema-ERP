@@ -6,22 +6,60 @@ import { createContext, useContext, useEffect, useState } from 'react';
 
 const RolesContext = createContext<{
   data: costos[];
-  setData: React.Dispatch<React.SetStateAction<costos[]>>;
-}>({
-  data: [],
-  setData: () => {},
-});
+  addCostos: (costos: costos[]) => void;
+  editCostos: (costos: costos[]) => void;
+  editSingleCosto: (costo: costos) => void;
+} | null>(null);
 
 export const RolesProvider = ({ children }: { children: React.ReactNode }) => {
   const [data, setData] = useState<costos[]>([]);
+
+  const addCostos = (costos: costos[]) => {
+    console.log('AGREGANDO COSTO!');
+    setData((prev) => [...prev, ...costos]);
+  };
+
+  const editCostos = (costos: costos[]) => {
+    setData((prev) => {
+      const newData = [...prev];
+      costos.forEach((costo) => {
+        const index = newData.findIndex(
+          (c) =>
+            c.rol.nombre === costo.rol.nombre &&
+            c.rol.experiencia === costo.rol.experiencia &&
+            c.mes === costo.mes &&
+            c.anio === costo.anio
+        );
+        if (index !== -1) {
+          newData[index] = costo;
+        }
+      });
+      return newData;
+    });
+  };
+
+  const editSingleCosto = (costo: costos) => {
+    setData((prev) => {
+      const newData = [...prev];
+      const index = newData.findIndex(
+        (c) =>
+          c.rol.nombre === costo.rol.nombre &&
+          c.rol.experiencia === costo.rol.experiencia &&
+          c.mes === costo.mes &&
+          c.anio === costo.anio
+      );
+      if (index !== -1) {
+        newData[index] = costo;
+      }
+      return newData;
+    });
+  };
 
   //! NOTA: Este fetch se podria hacer usando Sever Side Rendering pero no encontré la forma de hacerlo funcionar
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch(FINANZAS_API + FINANZAS_COSTOS, {
-          cache: 'no-store',
-        });
+        const res = await fetch(FINANZAS_API + FINANZAS_COSTOS);
 
         if (!res.ok) {
           throw new Error('Failed to fetch data');
@@ -47,12 +85,18 @@ export const RolesProvider = ({ children }: { children: React.ReactNode }) => {
     fetchData();
   }, []);
 
-  return <RolesContext.Provider value={{ data, setData }}>{children}</RolesContext.Provider>;
+  return (
+    <RolesContext.Provider value={{ data, addCostos, editCostos, editSingleCosto }}>
+      {children}
+    </RolesContext.Provider>
+  );
 };
 
 export const useRoles = (): {
   data: costos[];
-  setData: React.Dispatch<React.SetStateAction<costos[]>>;
+  addCostos: (costos: costos[]) => void;
+  editCostos: (costos: costos[]) => void;
+  editSingleCosto: (costo: costos) => void;
 } => {
   const context = useContext(RolesContext);
 

@@ -51,16 +51,17 @@ import { useRoles } from '../context/RolesContext';
 import { costos } from '@/types/costos';
 import { useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { MESES } from '@/constants';
+import { FINANZAS_API, FINANZAS_CARGAR_COSTO, MESES } from '@/constants';
+import { Mes } from '@/types/enums';
 registerLocale('es', es);
 
 export default function ClientComponent({ rolesPosibles }: ClientComponentProps) {
   const searchParams = useSearchParams();
-  const mes = searchParams.get('mes');
+  const mes = Mes[searchParams.get('mes') as keyof typeof Mes];
   const anio = searchParams.get('anio');
-  const editar = mes && anio ? true : false;
+  const editar = searchParams.get('editar') === 'true';
 
-  const { data, setData } = useRoles();
+  const { data, addCostos } = useRoles();
   const router = useRouter();
   const toast = useToast();
 
@@ -69,7 +70,7 @@ export default function ClientComponent({ rolesPosibles }: ClientComponentProps)
       (costo: costos) =>
         costo.rol.nombre === rol &&
         costo.rol.experiencia === experiencia &&
-        costo.mes === mes &&
+        costo.mes === mes.toString() &&
         costo.anio === anio
     );
     return costo ? costo.costo : 0;
@@ -104,27 +105,44 @@ export default function ClientComponent({ rolesPosibles }: ClientComponentProps)
     }
   }, [data]);
 
-  const onSubmit = async (newData: z.infer<typeof formSchema>) => {
-    // Add it to the API
-    // ...
+  const onSubmit = async (formData: z.infer<typeof formSchema>) => {
+    const postData = formData.roles.flatMap((rol) =>
+      rol.experiencia.map((experiencia) => ({
+        nombre: rol.rol,
+        experiencia: experiencia.nombre,
+        costo: experiencia.sueldo,
+        mes: (formData.fecha.getMonth() + 1).toString(),
+        anio: formData.fecha.getFullYear().toString(),
+      }))
+    );
 
-    console.log('NUEVA DATA', newData);
-    console.log('DATA', data);
+    const res = await fetch(FINANZAS_API + FINANZAS_CARGAR_COSTO, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(postData),
+    });
 
-    /*
-     * Recordatorio: Cuaando haga el POST a la api, esta deberia devolverme los datos nuevos,
-     * por lo que yo deberia poder actualizar la data sin necesidad
-     * de hacer un GET a la API.
-     */
+    if (!res.ok) {
+      toast.toast({
+        title: 'Error al cargar el costo',
+        description: 'Hubo un error al cargar el costo, por favor intente nuevamente.',
+      });
+      return;
+    }
 
+    const postJson = await res.json();
     toast.toast({
       title: `Se ${editar ? 'actualizó' : 'agregó'} el costo correctamente`,
       description: `Se ${
         editar ? 'actualizaron' : 'agregaron'
       } los costos correctamente para el mes ${
-        MESES[newData.fecha.getMonth() + 1]
-      } del año ${newData.fecha.getFullYear()}`,
+        MESES[formData.fecha.getMonth() + 1]
+      } del año ${formData.fecha.getFullYear()}`,
     });
+
+    addCostos(postJson);
 
     router.push('/costos-rol');
   };
@@ -132,7 +150,6 @@ export default function ClientComponent({ rolesPosibles }: ClientComponentProps)
   return (
     <div className="mb-8">
       <h1 className="text-center text-4xl font-bold mt-8 mb-16">Carga de costos mensuales</h1>
-
       <Card className="mx-auto w-fit">
         <CardHeader>
           <CardTitle>
@@ -160,12 +177,12 @@ export default function ClientComponent({ rolesPosibles }: ClientComponentProps)
                           }
                         }}
                         locale={'es'}
-                        disabled={!!mes && !!anio}
+                        disabled={editar}
                         showMonthYearPicker
                         dateFormat="MM/yyyy"
                         minDate={new Date(2000, 0)}
                         maxDate={new Date()}
-                        customInput={<DateInput disabled={!!mes && !!anio} />}
+                        customInput={<DateInput disabled={editar} />}
                       />
                     </FormControl>
                     <FormDescription>Seleccione el mes y el año que desea cargar.</FormDescription>

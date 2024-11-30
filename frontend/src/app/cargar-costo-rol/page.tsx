@@ -2,7 +2,6 @@ import ClientComponent from './ClientComponent';
 import { ROLES_API } from '@/constants';
 import { roles } from '@/types/rolesAPI';
 import { Suspense } from 'react';
-import { RolesProvider } from '../context/RolesContext';
 
 export type rolesPosibles = {
   nombre: string;
@@ -35,10 +34,8 @@ async function obtenerRolesPosibles() {
 export default async function page() {
   const roles = await obtenerRolesPosibles();
   return (
-    <RolesProvider>
-      <Suspense>
-        <ClientComponent rolesPosibles={roles} />
-      </Suspense>
-    </RolesProvider>
+    <Suspense>
+      <ClientComponent rolesPosibles={roles} />
+    </Suspense>
   );
 }

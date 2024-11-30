@@ -8,11 +8,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MESES } from '@/constants';
-import { ChevronDown, UserPlus } from 'lucide-react';
+import { ChevronDown, UserRoundPen, UserRoundPlusIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { useToast } from '@/hooks/use-toast';
 import Table, { costosTableData } from './Table';
 import { useRoles } from '../context/RolesContext';
 import { costos } from '@/types/costos';
@@ -62,53 +60,12 @@ export default function ClientComponent() {
     month: MESES[new Date().getMonth()],
   });
 
-  const { toast } = useToast();
-  const searchParams = useSearchParams();
-
   useEffect(() => {
     setPeriod({
       year: fechasPosibles[0] ? fechasPosibles[0].anio : new Date().getFullYear().toString(),
       month: fechasPosibles[0] ? fechasPosibles[0].meses[0] : MESES[new Date().getMonth()],
     });
   }, [data, fechasPosibles]);
-
-  useEffect(() => {
-    const id = searchParams.get('id');
-    const nombre = searchParams.get('nombre');
-    const experiencia = searchParams.get('experiencia');
-    const costo = searchParams.get('costo');
-    const editado = searchParams.get('editado') === 'true';
-
-    // * NOTA: Esto es solo para que se actualice en tiempo real, cuando se haga refresh solo se usa la obtenida de la API
-    //! NOTA2: Esto ya no deberia ser util en la neuva implementación ya que usa context.
-    if (nombre && experiencia && costo) {
-      if (editado) {
-        const index = data.findIndex((costo) => costo.id.toString() === id);
-        data[index].costo = parseInt(costo);
-      } else {
-        data.push({
-          id: id?.toString() || '',
-          anio: period.year,
-          mes: period.month,
-          costo: parseInt(costo),
-          rol: {
-            id: data.length + 1,
-            nombre: nombre,
-            experiencia: experiencia,
-          },
-        });
-      }
-
-      setTimeout(() => {
-        toast({
-          title: `Se ${editado ? 'actualizó' : 'agregó'} el costo correctamente`,
-          description: `Se ${
-            editado ? 'actualizó' : 'agregó'
-          } el costo ${costo} al rol ${nombre.toLowerCase()} con experiencia ${experiencia.toLowerCase()}`,
-        });
-      }, 100);
-    }
-  }, [searchParams, toast, period.year, period.month, data]);
 
   function obtenerCostos(): costosTableData[] {
     const costos: costosTableData[] = [];
@@ -178,12 +135,37 @@ export default function ClientComponent() {
               </DropdownMenu>
             </div>
           </div>
-          <Link href={'/cargar-costo-rol'}>
-            <Button className="font-semibold">
-              <UserPlus size={20} />
-              Cargar Costo
-            </Button>
-          </Link>
+          <div className="flex  gap-4">
+            <Link
+              href={{
+                pathname: '/cargar-costo-rol',
+                query: {
+                  mes: period.month,
+                  anio: period.year,
+                },
+              }}
+            >
+              <Button className="font-semibold">
+                <UserRoundPlusIcon size={20} />
+                Cargar Costos
+              </Button>
+            </Link>
+            <Link
+              href={{
+                pathname: '/cargar-costo-rol',
+                query: {
+                  mes: period.month,
+                  anio: period.year,
+                  editar: true,
+                },
+              }}
+            >
+              <Button className="font-semibold">
+                <UserRoundPen size={20} />
+                Editar costos
+              </Button>
+            </Link>
+          </div>
         </div>
         <div>
           <Table data={obtenerCostos()} mes={period.month} anio={period.year} />
