@@ -16,7 +16,9 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -233,6 +235,58 @@ class FinanzasApplicationTests {
         assertEquals(1200, updatedCostosMensualesResponse.getCosto());
         assertEquals(costosMensualesResponse.getId(), updatedCostosMensualesResponse.getId());
     }
+
+    @Test
+    void seModificanLosCostosCorrectamente() {
+        List<CostosMensualesRequest> requestList = new ArrayList<>();
+        CostosMensualesRequest request = new CostosMensualesRequest();
+        request.setCosto(1000);
+        request.setNombre("Desarrollador");
+        request.setExperiencia("Senior");
+        requestList.add(request);
+    
+        ParameterizedTypeReference<List<CostosMensualesResponse>> responseType =
+                new ParameterizedTypeReference<>() {};
+    
+        List<CostosMensualesResponse> initialResponses = webClient.post()
+                .uri(CARGAR_COSTOS_URL)
+                .body(Mono.just(requestList), ParameterizedTypeReference.forType(List.class))
+                .retrieve()
+                .bodyToMono(responseType)
+                .block();
+    
+        assertNotNull(initialResponses);
+        assertFalse(initialResponses.isEmpty());
+    
+        CostosMensualesResponse costosMensualesResponse = initialResponses.get(initialResponses.size() - 1);
+    
+        Map<Long, CostoRequest> costosList = new HashMap<>();
+        CostoRequest costoRequest = new CostoRequest();
+        costoRequest.setCosto(1200);
+        costosList.put(costosMensualesResponse.getId(), costoRequest);
+    
+        ParameterizedTypeReference<List<CostosMensualesResponse>> updateResponseType =
+                new ParameterizedTypeReference<>() {};
+    
+        List<CostosMensualesResponse> updatedResponses = webClient.put()
+                .uri("/api/v1/finanzas/actualizar-costos")
+                .body(Mono.just(costosList), ParameterizedTypeReference.forType(Map.class))
+                .retrieve()
+                .bodyToMono(updateResponseType)
+                .block();
+    
+        assertNotNull(updatedResponses);
+        assertFalse(updatedResponses.isEmpty());
+    
+        CostosMensualesResponse updatedCostosMensualesResponse = updatedResponses.stream()
+                .filter(response -> response.getId().equals(costosMensualesResponse.getId()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("El costo actualizado no se encontró en la respuesta."));
+    
+        assertEquals(1200, updatedCostosMensualesResponse.getCosto());
+        assertEquals(costosMensualesResponse.getId(), updatedCostosMensualesResponse.getId());
+    }
+    
 
     @Test
     void noSePuedeCrearCostoConValorNegativo() {

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -56,6 +57,14 @@ public class CostosMensualesController {
     @PutMapping("/actualizar-costo/{id}")
     public ResponseEntity<Mono<CostosMensualesResponse>> actualizarCosto(@PathVariable Long id, @RequestBody CostoRequest costoRequest){
         return ResponseEntity.status(HttpStatus.OK).body(service.update(id, costoRequest));
+    }
+
+    @Operation(summary = "Actualizar todos los costos mensuales")
+    @ApiResponse(responseCode = "200", description = "Costos mensuales actualizados")
+    @ApiResponse(responseCode = "400", description = "Error en la actualización del costo mensual, el costo no puede ser negativo",  content = @Content(mediaType = "application/json", schema = @Schema(implementation = RolNoEncontradoException.class)))
+    @PutMapping("/actualizar-costos")
+    public ResponseEntity<Mono<List<CostosMensualesResponse>>> actualizarCostos(@RequestBody Map<Long, CostoRequest> costosRequest){
+        return ResponseEntity.status(HttpStatus.OK).body(service.updateAll(costosRequest));
     }
     
     @Operation(summary = "Dado un año, obtener los costos mes a mes del proyecto")

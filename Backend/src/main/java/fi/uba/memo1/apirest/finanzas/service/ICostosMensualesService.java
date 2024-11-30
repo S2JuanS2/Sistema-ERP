@@ -7,6 +7,7 @@ import fi.uba.memo1.apirest.finanzas.dto.CostoRequest;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ICostosMensualesService {
 
@@ -17,6 +18,8 @@ public interface ICostosMensualesService {
     Mono<List<CostosMensualesResponse>> save(List<CostosMensualesRequest> costos);
 
     Mono<CostosMensualesResponse> update(Long id, CostoRequest costoRequest);
+
+    Mono<List<CostosMensualesResponse>> updateAll(Map<Long, CostoRequest> costosRequest);
 
     Mono<TotalCostosProyectoResponse> obtenerCostosDeProyectos(String anio);
 }
