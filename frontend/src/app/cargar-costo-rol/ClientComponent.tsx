@@ -22,6 +22,21 @@ import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
+import { registerLocale } from 'react-datepicker';
+import { es } from 'date-fns/locale';
+import { useRoles } from '../context/RolesContext';
+import { costos } from '@/types/costos';
+import { useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import {
+  FINANZAS_ACTUALIZAR_VARIOS_COSTOS,
+  FINANZAS_API,
+  FINANZAS_CARGAR_COSTO,
+  MESES,
+} from '@/constants';
+import { Mes } from '@/types/enums';
+registerLocale('es', es);
+
 const formSchema = z.object({
   fecha: z.date({
     message: 'La fecha es requerida',
@@ -45,23 +60,13 @@ type ClientComponentProps = {
   rolesPosibles: rolesPosibles[];
 };
 
-import { registerLocale } from 'react-datepicker';
-import { es } from 'date-fns/locale';
-import { useRoles } from '../context/RolesContext';
-import { costos } from '@/types/costos';
-import { useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { FINANZAS_API, FINANZAS_CARGAR_COSTO, MESES } from '@/constants';
-import { Mes } from '@/types/enums';
-registerLocale('es', es);
-
 export default function ClientComponent({ rolesPosibles }: ClientComponentProps) {
   const searchParams = useSearchParams();
   const mes = Mes[searchParams.get('mes') as keyof typeof Mes];
   const anio = searchParams.get('anio');
-  const editar = searchParams.get('editar') === 'true';
+  const editando = searchParams.get('editar') === 'true';
 
-  const { data, addCostos } = useRoles();
+  const { data, addCostos, editCostos } = useRoles();
   const router = useRouter();
   const toast = useToast();
 
@@ -84,14 +89,14 @@ export default function ClientComponent({ rolesPosibles }: ClientComponentProps)
         rol: rol.nombre,
         experiencia: rol.experiencia.map((experiencia) => ({
           nombre: experiencia,
-          sueldo: editar ? buscarCosto(rol.nombre, experiencia) : 0,
+          sueldo: editando ? buscarCosto(rol.nombre, experiencia) : 0,
         })),
       })),
     },
   });
 
   useEffect(() => {
-    if (editar && data) {
+    if (editando && data) {
       form.reset({
         fecha: anio && mes ? new Date(+anio, +mes - 1) : new Date(),
         roles: rolesPosibles.map((rol) => ({
@@ -106,43 +111,113 @@ export default function ClientComponent({ rolesPosibles }: ClientComponentProps)
   }, [data]);
 
   const onSubmit = async (formData: z.infer<typeof formSchema>) => {
-    const postData = formData.roles.flatMap((rol) =>
-      rol.experiencia.map((experiencia) => ({
-        nombre: rol.rol,
-        experiencia: experiencia.nombre,
-        costo: experiencia.sueldo,
-        mes: (formData.fecha.getMonth() + 1).toString(),
-        anio: formData.fecha.getFullYear().toString(),
-      }))
-    );
+    if (!editando) {
+      const duplicated = data.find(
+        (costo: costos) =>
+          costo.mes === (formData.fecha.getMonth() + 1).toString() &&
+          costo.anio === formData.fecha.getFullYear().toString()
+      );
 
-    const res = await fetch(FINANZAS_API + FINANZAS_CARGAR_COSTO, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(postData),
-    });
-
-    if (!res.ok) {
-      toast.toast({
-        title: 'Error al cargar el costo',
-        description: 'Hubo un error al cargar el costo, por favor intente nuevamente.',
-      });
-      return;
+      if (duplicated) {
+        toast.toast({
+          title: 'Error al cargar el costo',
+          description: `Ya existe un costo para el mes ${
+            MESES[formData.fecha.getMonth() + 1]
+          } del año ${formData.fecha.getFullYear()}`,
+          variant: 'destructive',
+        });
+        return;
+      }
     }
 
-    const postJson = await res.json();
-    toast.toast({
-      title: `Se ${editar ? 'actualizó' : 'agregó'} el costo correctamente`,
-      description: `Se ${
-        editar ? 'actualizaron' : 'agregaron'
-      } los costos correctamente para el mes ${
-        MESES[formData.fecha.getMonth() + 1]
-      } del año ${formData.fecha.getFullYear()}`,
-    });
+    if (editando) {
+      // El put debe recibir algo del estilo: [ {id del costo}: { costo: {costo nuevo} }, {id del costo}: { costo: {costo nuevo} } ]
+      const putData = data
+        .filter(
+          (costo: costos) => anio && costo.mes === mes.toString() && costo.anio === anio.toString()
+        )
+        .map((costo: costos) => ({
+          [costo.id]: {
+            costo:
+              formData.roles
+                .find((rol) => rol.rol === costo.rol.nombre)
+                ?.experiencia.find((experiencia) => experiencia.nombre === costo.rol.experiencia)
+                ?.sueldo ?? 0,
+          },
+        }));
 
-    addCostos(postJson);
+      // Convert array to object array
+      const putDataObject = Object.assign({}, ...putData.map((item) => item));
+
+      const res = await fetch(FINANZAS_API + FINANZAS_ACTUALIZAR_VARIOS_COSTOS, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(putDataObject),
+      });
+
+      if (!res.ok) {
+        toast.toast({
+          title: 'Error al actualizar el costo',
+          description: 'Hubo un error al actualizar el costo, por favor intente nuevamente.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      toast.toast({
+        title: 'Se actualizó el costo correctamente',
+        description: `Se actualizaron los costos correctamente para el mes ${
+          MESES[formData.fecha.getMonth() + 1]
+        } del año ${formData.fecha.getFullYear()}`,
+        variant: 'success',
+      });
+
+      const putJson = await res.json();
+
+      editCostos(putJson);
+    } else {
+      const postData = formData.roles.flatMap((rol) =>
+        rol.experiencia.map((experiencia) => ({
+          nombre: rol.rol,
+          experiencia: experiencia.nombre,
+          costo: experiencia.sueldo,
+          mes: (formData.fecha.getMonth() + 1).toString(),
+          anio: formData.fecha.getFullYear().toString(),
+        }))
+      );
+
+      const res = await fetch(FINANZAS_API + FINANZAS_CARGAR_COSTO, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(postData),
+      });
+
+      if (!res.ok) {
+        toast.toast({
+          title: 'Error al cargar el costo',
+          description: 'Hubo un error al cargar el costo, por favor intente nuevamente.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const postJson = await res.json();
+      toast.toast({
+        title: `Se ${editando ? 'actualizó' : 'agregó'} el costo correctamente`,
+        description: `Se ${
+          editando ? 'actualizaron' : 'agregaron'
+        } los costos correctamente para el mes ${
+          MESES[formData.fecha.getMonth() + 1]
+        } del año ${formData.fecha.getFullYear()}`,
+        variant: 'success',
+      });
+
+      addCostos(postJson);
+    }
 
     router.push('/costos-rol');
   };
@@ -153,7 +228,7 @@ export default function ClientComponent({ rolesPosibles }: ClientComponentProps)
       <Card className="mx-auto w-fit">
         <CardHeader>
           <CardTitle>
-            {editar ? 'Actualizar un costo mensual' : 'Cargar costos mensuales'}
+            {editando ? 'Actualizar un costo mensual' : 'Cargar costos mensuales'}
           </CardTitle>
           <CardDescription>
             Seleccione una fecha y el rol para cargar el costo mensual.
@@ -176,13 +251,14 @@ export default function ClientComponent({ rolesPosibles }: ClientComponentProps)
                             form.setValue('fecha', date);
                           }
                         }}
+                        calendarClassName="datePicker"
                         locale={'es'}
-                        disabled={editar}
+                        disabled={editando}
                         showMonthYearPicker
                         dateFormat="MM/yyyy"
                         minDate={new Date(2000, 0)}
                         maxDate={new Date()}
-                        customInput={<DateInput disabled={editar} />}
+                        customInput={<DateInput disabled={editando} />}
                       />
                     </FormControl>
                     <FormDescription>Seleccione el mes y el año que desea cargar.</FormDescription>
@@ -247,7 +323,7 @@ export default function ClientComponent({ rolesPosibles }: ClientComponentProps)
                 </Link>
 
                 <Button type="submit" className="bg-primary font-semibold">
-                  {editar ? 'Actualizar costo' : 'Cargar costo'}
+                  {editando ? 'Actualizar costo' : 'Cargar costo'}
                 </Button>
               </div>
             </form>

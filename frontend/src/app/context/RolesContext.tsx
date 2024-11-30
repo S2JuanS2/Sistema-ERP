@@ -1,6 +1,8 @@
 'use client';
 
 import { FINANZAS_API, FINANZAS_COSTOS } from '@/constants';
+import { useToast } from '@/hooks/use-toast';
+import { fetchWithTimeout } from '@/lib/fetchWithTimeout';
 import { costos } from '@/types/costos';
 import { createContext, useContext, useEffect, useState } from 'react';
 
@@ -13,6 +15,7 @@ const RolesContext = createContext<{
 
 export const RolesProvider = ({ children }: { children: React.ReactNode }) => {
   const [data, setData] = useState<costos[]>([]);
+  const toast = useToast();
 
   const addCostos = (costos: costos[]) => {
     console.log('AGREGANDO COSTO!');
@@ -59,7 +62,7 @@ export const RolesProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch(FINANZAS_API + FINANZAS_COSTOS);
+        const res = await fetchWithTimeout(FINANZAS_API + FINANZAS_COSTOS);
 
         if (!res.ok) {
           throw new Error('Failed to fetch data');
@@ -79,6 +82,11 @@ export const RolesProvider = ({ children }: { children: React.ReactNode }) => {
         setData(data);
       } catch (error) {
         console.error(error);
+        toast.toast({
+          title: 'Error',
+          description: 'No se pudo cargar los costos',
+          variant: 'destructive',
+        });
       }
     }
 

@@ -168,7 +168,7 @@ export default function ClientComponent() {
           </div>
         </div>
         <div>
-          <Table data={obtenerCostos()} mes={period.month} anio={period.year} />
+          <Table data={obtenerCostos()} />
         </div>
       </main>
     </div>

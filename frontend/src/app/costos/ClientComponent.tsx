@@ -40,6 +40,7 @@ export default function ClientComponent() {
       setProjectsData(data);
     } catch (error) {
       console.error(error);
+      // TODO: Toast lanzando error y no usando mock?
 
       // Cargo datos de prueba, en caso de que en la demo todo salga mal
       const response = await fetch('/mock/proyectos.json');
