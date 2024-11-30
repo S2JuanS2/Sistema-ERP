@@ -121,9 +121,9 @@ export default function ClientComponent({ rolesPosibles }: ClientComponentProps)
       if (duplicated) {
         toast.toast({
           title: 'Error al cargar el costo',
-          description: `Ya existe un costo para el mes ${
-            MESES[formData.fecha.getMonth() + 1]
-          } del año ${formData.fecha.getFullYear()}`,
+          description: `Ya existe un costo para el mes ${MESES[
+            formData.fecha.getMonth()
+          ].toLowerCase()} del año ${formData.fecha.getFullYear()}`,
           variant: 'destructive',
         });
         return;
@@ -168,9 +168,9 @@ export default function ClientComponent({ rolesPosibles }: ClientComponentProps)
 
       toast.toast({
         title: 'Se actualizó el costo correctamente',
-        description: `Se actualizaron los costos correctamente para el mes ${
-          MESES[formData.fecha.getMonth() + 1]
-        } del año ${formData.fecha.getFullYear()}`,
+        description: `Se actualizaron los costos correctamente para el mes ${MESES[
+          formData.fecha.getMonth()
+        ].toLowerCase()} del año ${formData.fecha.getFullYear()}`,
         variant: 'success',
       });
 
@@ -207,12 +207,10 @@ export default function ClientComponent({ rolesPosibles }: ClientComponentProps)
 
       const postJson = await res.json();
       toast.toast({
-        title: `Se ${editando ? 'actualizó' : 'agregó'} el costo correctamente`,
-        description: `Se ${
-          editando ? 'actualizaron' : 'agregaron'
-        } los costos correctamente para el mes ${
-          MESES[formData.fecha.getMonth() + 1]
-        } del año ${formData.fecha.getFullYear()}`,
+        title: `Se agregaron los costos correctamente`,
+        description: `Se agregaron los costos correctamente para el mes ${MESES[
+          formData.fecha.getMonth()
+        ].toLowerCase()} del año ${formData.fecha.getFullYear()}`,
         variant: 'success',
       });
 
