@@ -94,14 +94,14 @@ export default function ClientComponent() {
         <CardHeader>
           <CardTitle>{id ? 'Actualizar un costo mensual' : 'Cargar costo mensual'}</CardTitle>
           <CardDescription>
-            Seleccione el nuevo sueldo para el rol y la experiencia seleccionada.
+            Seleccione el nuevo costo para el rol y la experiencia seleccionada.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
               <div className="border-slate-200 border rounded p-4">
-                <p className="text-lg font-bold mb-4">Información del costo seleccionado</p>
+                <p className="text-lg font-bold mb-4">Información del recurso seleccionado</p>
                 <div className="flex flex-col gap-2 font-semibold">
                   <p>
                     Fecha:{' '}
@@ -123,7 +123,7 @@ export default function ClientComponent() {
                 name="sueldo"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Sueldo</FormLabel>
+                    <FormLabel>Costo</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Selecciona un sueldo en divisa dolar"
@@ -135,7 +135,7 @@ export default function ClientComponent() {
                         min={0}
                       />
                     </FormControl>
-                    <FormDescription>Ingrese el nuevo sueldo a cambiar</FormDescription>
+                    <FormDescription>Ingrese el nuevo costo a actualizar</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

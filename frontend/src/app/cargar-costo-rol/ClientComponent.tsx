@@ -229,7 +229,9 @@ export default function ClientComponent({ rolesPosibles }: ClientComponentProps)
             {editando ? 'Actualizar un costo mensual' : 'Cargar costos mensuales'}
           </CardTitle>
           <CardDescription>
-            Seleccione una fecha y el rol para cargar el costo mensual.
+            {editando
+              ? 'Ingrese los nuevos costos para cada rol'
+              : 'Seleccione una fecha y ingrese los costos mensuales de cada rol.'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -259,7 +261,11 @@ export default function ClientComponent({ rolesPosibles }: ClientComponentProps)
                         customInput={<DateInput disabled={editando} />}
                       />
                     </FormControl>
-                    <FormDescription>Seleccione el mes y el año que desea cargar.</FormDescription>
+                    <FormDescription>
+                      {editando
+                        ? 'Periodo de los costos seleccionados'
+                        : 'Seleccione el mes y el año que desea cargar.'}
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -287,7 +293,7 @@ export default function ClientComponent({ rolesPosibles }: ClientComponentProps)
                             <FormControl>
                               <Input
                                 placeholder="Escribe un sueldo en dólares"
-                                className="min-w-[250px]"
+                                className="min-w-[250px] focus-visible:ring-primary"
                                 {...field}
                                 type="number"
                                 onInput={(e) => {
@@ -307,7 +313,7 @@ export default function ClientComponent({ rolesPosibles }: ClientComponentProps)
                     ))}
                   </div>
                   <FormDescription className="mt-4">
-                    Seleccione un sueldo para cada experiencia
+                    Ingrese un costo para cada experiencia del rol
                   </FormDescription>
                 </div>
               ))}
@@ -321,7 +327,7 @@ export default function ClientComponent({ rolesPosibles }: ClientComponentProps)
                 </Button>
 
                 <Button type="submit" className="bg-primary font-semibold">
-                  {editando ? 'Actualizar costo' : 'Cargar costo'}
+                  {editando ? 'Actualizar costos' : 'Cargar costos'}
                 </Button>
               </div>
             </form>

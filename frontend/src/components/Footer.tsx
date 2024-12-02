@@ -2,8 +2,8 @@ import { Mail, Phone, Pin } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <div className="bg-gray-100 mt-6">
-      <footer className="border-t border-t-gray-300 text-black pt-2">
+    <div className="bg-primary  mt-6">
+      <footer className="border-t border-t-gray-300 text-white pt-2">
         <div className="container mx-16 flex flex-row justify-evenly py-2">
           <div className="flex flex-col gap-1">
             <p className="font-bold ">Oficinas</p>

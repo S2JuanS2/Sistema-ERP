@@ -12,11 +12,11 @@ import Link from 'next/link';
 
 export default function SimpleNavbar() {
   return (
-    <nav className="py-2 px-6 flex items-center gap-10 border-b border-b-gray-300 bg-gray-100">
+    <nav className="py-2 px-6 flex items-center gap-10 border-b text-white border-b-gray-300 bg-primary">
       <h1 className="text-2xl font-bold mr-6 ">
         <Link
           href="/"
-          className="focus-visible:border-2 focus-visible:border-primary focus-visible:outline-none focus-visible:rounded"
+          className="focus-visible:border-2 focus-visible:border-primary focus-visible:outline-none  focus-visible:rounded"
         >
           Praxis Systems Argentina
         </Link>
