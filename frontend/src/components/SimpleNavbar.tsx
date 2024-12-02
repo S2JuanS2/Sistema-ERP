@@ -7,6 +7,7 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
+import { PROYECTOS_COSTOS_POR_RECURSO, PROYECTOS_RESUMEN_SEMANAL } from '@/constants';
 import Link from 'next/link';
 
 export default function SimpleNavbar() {
@@ -24,6 +25,7 @@ export default function SimpleNavbar() {
         <NavigationMenuList>
           <NavigationMenuItem>
             <NavigationMenuLink
+              href={PROYECTOS_RESUMEN_SEMANAL}
               className={`${navigationMenuTriggerStyle()} text-[16px] font-semibold hover:cursor-pointer bg-gray-100 hover:bg-gray-200 focus:border-2 focus:border-primary`}
             >
               Resumen Semanal
@@ -31,6 +33,7 @@ export default function SimpleNavbar() {
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuLink
+              href={PROYECTOS_COSTOS_POR_RECURSO}
               className={`${navigationMenuTriggerStyle()} text-[16px] font-semibold hover:cursor-pointer bg-gray-100 hover:bg-gray-200 focus:border-2 focus:border-primary`}
             >
               Costos por recurso
