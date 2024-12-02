@@ -15,7 +15,7 @@ import Table, { costosTableData } from './Table';
 import { useRoles } from '../context/RolesContext';
 import { costos } from '@/types/costos';
 
-export type fechasPosibles = {
+type fechasPosibles = {
   anio: string;
   meses: string[];
 };
