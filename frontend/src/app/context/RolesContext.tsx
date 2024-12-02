@@ -8,6 +8,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 
 const RolesContext = createContext<{
   data: costos[];
+  loading: boolean;
   addCostos: (costos: costos[]) => void;
   editCostos: (costos: costos[]) => void;
   editSingleCosto: (costo: costos) => void;
@@ -15,10 +16,10 @@ const RolesContext = createContext<{
 
 export const RolesProvider = ({ children }: { children: React.ReactNode }) => {
   const [data, setData] = useState<costos[]>([]);
+  const [loading, setLoading] = useState(true);
   const toast = useToast();
 
   const addCostos = (costos: costos[]) => {
-    console.log('AGREGANDO COSTO!');
     setData((prev) => [...prev, ...costos]);
   };
 
@@ -80,6 +81,7 @@ export const RolesProvider = ({ children }: { children: React.ReactNode }) => {
         });
 
         setData(data);
+        setLoading(false);
       } catch (error) {
         console.error(error);
         toast.toast({
@@ -94,7 +96,7 @@ export const RolesProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <RolesContext.Provider value={{ data, addCostos, editCostos, editSingleCosto }}>
+    <RolesContext.Provider value={{ data, loading, addCostos, editCostos, editSingleCosto }}>
       {children}
     </RolesContext.Provider>
   );
@@ -102,6 +104,7 @@ export const RolesProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useRoles = (): {
   data: costos[];
+  loading: boolean;
   addCostos: (costos: costos[]) => void;
   editCostos: (costos: costos[]) => void;
   editSingleCosto: (costo: costos) => void;

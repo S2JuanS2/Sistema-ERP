@@ -50,7 +50,7 @@ function obtenerFechasPosibles(data: costos[]): fechasPosibles[] {
 }
 
 export default function ClientComponent() {
-  const { data } = useRoles();
+  const { data, loading } = useRoles();
   const fechasPosibles = useMemo(() => {
     return obtenerFechasPosibles(data);
   }, [data]);
@@ -168,7 +168,7 @@ export default function ClientComponent() {
           </div>
         </div>
         <div>
-          <Table data={obtenerCostos()} />
+          <Table data={obtenerCostos()} loading={loading} />
         </div>
       </main>
     </div>

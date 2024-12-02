@@ -33,6 +33,7 @@ export default function ClientComponent() {
     to: 'Diciembre',
   });
   const [projectsData, setProjectsData] = useState<Proyectos>();
+  const [loading, setLoading] = useState(true);
   const toast = useToast();
 
   const fetchData = async (year: string | number) => {
@@ -40,6 +41,7 @@ export default function ClientComponent() {
       const response = await fetchWithTimeout(FINANZAS_API + FINANZAS_PROYECTOS + year);
       const data = await response.json();
       setProjectsData(data);
+      setLoading(false);
     } catch (error) {
       console.error(error);
       toast.toast({
@@ -63,6 +65,7 @@ export default function ClientComponent() {
   const handleChangeYear = (year: number) => {
     setPeriod({ ...period, year });
     fetchData(year);
+    setLoading(true);
   };
 
   return (
@@ -124,7 +127,7 @@ export default function ClientComponent() {
           </div>
         </div>
         <div className="w-full">
-          <Table data={projectsData?.proyectos || []} period={period} />
+          <Table data={projectsData?.proyectos || []} period={period} loading={loading} />
         </div>
         <p className="text-lg font-bold">
           Costo total:
