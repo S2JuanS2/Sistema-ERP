@@ -46,7 +46,7 @@ export default function ClientComponent() {
       console.error(error);
       toast.toast({
         title: 'Error',
-        description: 'No se pudieron cargar los datos de los proyectos, cargando datos de prueba',
+        description: 'No se pudieron cargar los datos de los proyectos',
         variant: 'destructive',
       });
 
