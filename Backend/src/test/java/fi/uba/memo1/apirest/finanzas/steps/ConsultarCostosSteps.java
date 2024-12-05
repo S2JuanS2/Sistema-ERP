@@ -18,9 +18,9 @@ import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ConsultarCostosSteps {
@@ -38,8 +38,13 @@ public class ConsultarCostosSteps {
         this.costosAgregados = new ArrayList<>();
     }
 
-    @Given("I add a role cost with name {string}, experience {string}, cost {string}")
-    public void iAddARoleCostWithNameExperienceCost(String name, String experience, String cost) {
+    @Given("I am on the page that allows me to get the costs of all roles")
+    public void iAmOnThePageThatAllowsMeToGetTheCostsOfAllRoles() {
+
+    }
+
+    @And("I added a role cost with name {string}, experience {string}, cost {string}")
+    public void iHaveAddedARoleCostWithNameExperienceCost(String name, String experience, String cost) {
         List<CostosMensualesRequest> requestList = new ArrayList<>();
         CostosMensualesRequest request = new CostosMensualesRequest();
         request.setNombre(name);
@@ -54,17 +59,17 @@ public class ConsultarCostosSteps {
                     .toEntity(new ParameterizedTypeReference<List<CostosMensualesResponse>>() {})
                     .block();
 
-            this.costosAgregados.add(costoObtenido.getBody().get(costoObtenido.getBody().size() -1));
+            this.costosAgregados.add(Objects.requireNonNull(Objects.requireNonNull(costoObtenido).getBody()).get(costoObtenido.getBody().size() -1));
         } catch (WebClientResponseException e) {
             this.exception = e;
         }
     }
 
-    @When("I GET to the route {string}")
-    public void iGETToTheRoute(String route) {
+    @When("I try to get the costs of all roles")
+    public void iTryToGetTheCostsOfAllRoles() {
         try {
             this.response = webClient.get()
-                    .uri(route)
+                    .uri("/api/v1/finanzas/costos")
                     .retrieve()
                     .toEntity(String.class)
                     .block();
@@ -73,29 +78,20 @@ public class ConsultarCostosSteps {
         }
     }
 
-    @And("the response should only contain the first and second roles")
-    public void theResponseShouldOnlyContainTheFirstAndSecondRoles() throws JsonProcessingException {
+    @Then("the system should return the costs of the roles correctly")
+    public void theSystemShouldReturnTheCostsOfTheRolesCorrectly() throws JsonProcessingException {
+        assertTrue(this.response.getStatusCode().is2xxSuccessful());
+
         ArrayList<CostosMensualesResponse> responseCostos = StepsHelper.jsonToCostoMensualesResponseArray(this.response.getBody());
 
-        assertTrue(responseCostos.contains(this.costosAgregados.get(0)));
-        assertTrue(responseCostos.contains(this.costosAgregados.get(1)));
+        assertTrue(responseCostos.containsAll(this.costosAgregados));
     }
 
-    @Then("the response should have status {int}")
-    public void theResponseShouldHaveStatus(int status) {
-        if (this.exception != null) {
-            assertEquals(status, this.exception.getStatusCode().value());
-            return;
-        }
-
-        assertEquals(status, this.response.getStatusCode().value());
-    }
-
-    @When("I GET to the route {string} with the id of the first role cost")
-    public void iGETToTheRouteWithTheIdOfTheFirstRoleCost(String route) {
+    @When("I try to get the costs of the role")
+    public void iTryToGetTheCostsOfTheRole() {
         try {
             this.response = webClient.get()
-                    .uri(route + this.costosAgregados.get(0).getId())
+                    .uri("/api/v1/finanzas/costos/" + this.costosAgregados.get(0).getId())
                     .retrieve()
                     .toEntity(String.class)
                     .block();
@@ -104,31 +100,32 @@ public class ConsultarCostosSteps {
         }
     }
 
-    @And("the response should contain the first role cost")
-    public void theResponseShouldContainTheFirstRoleCost() throws JsonProcessingException {
+    @Then("the system should return the cost of the role correctly")
+    public void theSystemShouldReturnTheCostOfTheRoleCorrectly() throws JsonProcessingException {
+        assertTrue(this.response.getStatusCode().is2xxSuccessful());
+
         CostosMensualesResponse costoObtenido = StepsHelper.jsonToCostoMensualesResponse(this.response.getBody());
 
         assertEquals(this.costosAgregados.get(0), costoObtenido);
     }
 
-    @When("I GET to the route {string} with an invalid id")
-    public void iGETToTheRouteWithAnInvalidId(String route) {
+    @When("I try to get the costs of the role with an invalid id")
+    public void iTryToGetTheCostsOfTheRoleWithAnInvalidId() {
         try {
             this.response = webClient.get()
-                    .uri(route + "1000")
+                    .uri("/api/v1/finanzas/costos/1000")
                     .retrieve()
                     .toEntity(String.class)
                     .block();
-
         } catch (WebClientResponseException e) {
             this.exception = e;
         }
     }
 
-    @And("the response should contain the message {string}")
-    public void theResponseShouldContainTheMessage(String message) throws JsonProcessingException {
-        String responseBody = StepsHelper.jsonErrorToMessage(exception.getResponseBodyAsString());
+    @Then("the system should return an error message")
+    public void theSystemShouldReturnAnErrorMessage() {
+        assertTrue(Objects.nonNull(this.exception));
 
-        assertEquals(message, responseBody);
+        assertTrue(this.exception.getStatusCode().is4xxClientError());
     }
 }

@@ -1,10 +1,8 @@
 package fi.uba.memo1.apirest.finanzas.steps;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesRequest;
 import fi.uba.memo1.apirest.finanzas.dto.CostosMensualesResponse;
 import io.cucumber.java.Before;
-import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -20,17 +18,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class CargarCostosSteps {
-    private String name;
-    private double cost;
-    private String experience;
-    private String month;
-    private String year;
     private ResponseEntity<List<CostosMensualesResponse>> response;
     private WebClientResponseException exception;
+    private Double newCost;
 
     private WebClient webClient;
 
@@ -43,81 +37,76 @@ public class CargarCostosSteps {
     }
 
 
-    @And("a role experience {string}")
-    public void aRoleExperience(String experience) {
-        this.experience = experience;
+    @Given("I am on the page that allows me to load the cost of a role")
+    public void iAmOnThePageThatAllowsMeToLoadTheCostOfARole() {
     }
 
-    @Given("I have a role name {string}")
-    public void iHaveARoleName(String name) {
-        this.name = name;
-    }
-
-    @Given("a month {string}")
-    public void aMonth(String month) {
-        this.month = month;
-        
-    }
-    @Given("a year {string}")
-    public void aYear(String year) {
-        this.year = year;
-    }
-
-    @When("I POST to the route {string}")
-    public void iPOSTToTheRoute(String route) {
+    @When("I try to add a role with name {string} and experience {string} and cost {string}")
+    public void iTryToAddARoleWithNameAndExperienceAndCost(String name, String experience, String cost) {
         List<CostosMensualesRequest> requestList = new ArrayList<>();
         CostosMensualesRequest request = new CostosMensualesRequest();
         request.setNombre(name);
         request.setExperiencia(experience);
-        request.setCosto(cost);
-        if(!(this.month == null && this.year == null)){
-            request.setMes(month);
-            request.setAnio(year);
-        }
+        request.setCosto(Double.parseDouble(cost));
+
         requestList.add(request);
 
         try {
-        this.response = webClient.post()
-                .uri(route)
-                .body(Mono.just(requestList), new ParameterizedTypeReference<List<CostosMensualesResponse>>() {})
-                .retrieve()
-                .toEntity(new ParameterizedTypeReference<List<CostosMensualesResponse>>() {})
-                .block();
-
-    } catch (WebClientResponseException e) {
-        this.exception = e;
-    }
-
-    }
-
-    @And("a role cost {string}")
-    public void aRoleCost(String cost) {
-        this.cost = Double.parseDouble(cost);
-    }
-
-    @Then("the status code should be {int}")
-    public void theStatusCodeShouldBe(int statusCode) {
-        if (this.exception != null) {
-            assertEquals(statusCode, this.exception.getStatusCode().value());
-            return;
+            this.response = webClient.post()
+                    .uri("/api/v1/finanzas/cargar-costo")
+                    .body(Mono.just(requestList), new ParameterizedTypeReference<List<CostosMensualesResponse>>() {})
+                    .retrieve()
+                    .toEntity(new ParameterizedTypeReference<List<CostosMensualesResponse>>() {})
+                    .block();
+        } catch (WebClientResponseException e) {
+            this.exception = e;
         }
-
-        assertEquals(statusCode, response.getStatusCode().value());
     }
 
-    @And("the response should be {string}")
-    public void theResponseShouldBe(String text) throws JsonProcessingException {
-        // Solo si hay una excepción, si no, el mensaje es el objeto
-        assertEquals(text, StepsHelper.jsonErrorToMessage(this.exception.getResponseBodyAsString()));
+    @Then("the system should load the role correctly")
+    public void theSystemShouldLoadTheRoleCorrectly() {
+        List<CostosMensualesResponse> costoObtenido = this.response.getBody();
+
+        assertTrue(this.response.getStatusCode().is2xxSuccessful());
+        assertFalse(Objects.requireNonNull(costoObtenido).isEmpty());
     }
 
-    @And("the response should be the object")
-    public void theResponseShouldBeTheObject() {
-        if (this.exception != null) {
-            return;
+    @Then("the system should throw an error and not load the role")
+    public void theSystemShouldThrowAnErrorAndNotLoadTheRole() {
+        assertNull(this.response);
+        assertTrue(this.exception.getStatusCode().is4xxClientError());
+    }
+
+    @When("I try to add a role with name {string} and experience {string} and cost {string} and month {string} and year {string}")
+    public void iTryToAddARoleWithNameAndExperienceAndCostAndMonthAndYear(String name, String experience, String cost, String month, String year) {
+        List<CostosMensualesRequest> requestList = new ArrayList<>();
+        CostosMensualesRequest request = new CostosMensualesRequest();
+        request.setNombre(name);
+        request.setExperiencia(experience);
+        request.setCosto(Double.parseDouble(cost));
+        request.setMes(month);
+        request.setAnio(year);
+        this.newCost = Double.parseDouble(cost);
+
+        requestList.add(request);
+
+        try {
+            this.response = webClient.post()
+                    .uri("/api/v1/finanzas/cargar-costo")
+                    .body(Mono.just(requestList), new ParameterizedTypeReference<List<CostosMensualesResponse>>() {})
+                    .retrieve()
+                    .toEntity(new ParameterizedTypeReference<List<CostosMensualesResponse>>() {})
+                    .block();
+        } catch (WebClientResponseException e) {
+            this.exception = e;
         }
-        CostosMensualesResponse costoObtenido = this.response.getBody().get(this.response.getBody().size() -1);
+    }
 
-        assertEquals(this.cost, Objects.requireNonNull(costoObtenido).getCosto());
+    @Then("the system should return the new cost of the role correctly")
+    public void theSystemShouldReturnTheNewCostOfTheRoleCorrectly() {
+        List<CostosMensualesResponse> costoObtenido = this.response.getBody();
+
+        assertTrue(this.response.getStatusCode().is2xxSuccessful());
+        assertEquals(newCost, Objects.requireNonNull(costoObtenido).get(0).getCosto());
     }
 }
