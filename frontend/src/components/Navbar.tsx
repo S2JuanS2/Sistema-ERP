@@ -7,6 +7,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -25,16 +26,17 @@ const finanzas: { title: string; href: string; description: string }[] = [
   },
 ];
 
+//! NAV ANTIGUA, COMO NOS GUSTARIA QUE SEA HAY QUE VER SI EL OTRO MODULO SE ADAPTA ~_~
 export default function Navbar() {
   return (
-    <nav className="mt-2 py-2 px-4 flex items-center gap-8 border-b border-b-gray-300">
+    <nav className="mt-2 py-2 px-4 flex items-center gap-8 border-b border-b-gray-300 bg-gray-100">
       <h1 className="text-2xl font-bold mr-6">
         <Link href="/">Praxis Systems Argentina</Link>
       </h1>
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
-            <NavigationMenuTrigger className="text-md font-semibold">
+            <NavigationMenuTrigger className="text-md font-semibold bg-gray-100 hover:bg-gray-200">
               Finanzas
             </NavigationMenuTrigger>
             <NavigationMenuContent>
@@ -46,6 +48,13 @@ export default function Navbar() {
                 ))}
               </ul>
             </NavigationMenuContent>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuLink
+              className={`${navigationMenuTriggerStyle()} text-[16px] font-semibold hover:cursor-pointer bg-gray-100 hover:bg-gray-200`}
+            >
+              Proyectos
+            </NavigationMenuLink>
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>

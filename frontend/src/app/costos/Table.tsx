@@ -5,13 +5,15 @@ import { Proyecto } from '@/types/proyectosAPI';
 import { ColumnDef } from '@tanstack/react-table';
 import { Period } from './ClientComponent';
 import { Mes } from '@/types/enums';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type TableProps = {
   data: Proyecto[];
   period: Period;
+  loading: boolean;
 };
 
-export default function Table({ data, period }: TableProps) {
+export default function Table({ data, period, loading }: TableProps) {
   const columns: ColumnDef<Proyecto>[] = [
     {
       id: 'nombreProyecto',
@@ -117,6 +119,18 @@ export default function Table({ data, period }: TableProps) {
       costoTotal,
     };
   });
+
+  if (loading) {
+    data.length = 2;
+    columns.forEach((column) => {
+      if (column.id === 'nombreProyecto') {
+        column.cell = () => <Skeleton className="w-[300px] h-[20px] rounded-full bg-gray-300" />;
+        return;
+      }
+
+      column.cell = () => <Skeleton className="h-[20px] rounded-full bg-gray-300" />;
+    });
+  }
 
   return <DataTable columns={filteredColumns} data={data} />;
 }

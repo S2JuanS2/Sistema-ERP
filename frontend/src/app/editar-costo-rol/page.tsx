@@ -1,7 +1,7 @@
-import ClientComponent from './ClientComponent';
 import { Suspense } from 'react';
+import ClientComponent from './ClientComponent';
 
-export default async function Page() {
+export default function Page() {
   return (
     <Suspense>
       <ClientComponent />
