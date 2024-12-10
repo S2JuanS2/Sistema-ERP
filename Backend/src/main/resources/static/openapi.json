@@ -1,0 +1,386 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Finanzas API",
+    "description": "La API de Finanzas proporciona un conjunto de endpoints para gestionar los costos mensuales asociados a proyectos. Permite realizar operaciones CRUD sobre los costos, así como obtener información consolidada sobre los costos de proyectos por año.",
+    "version": "v1"
+  },
+  "tags": [
+    {
+      "name": "Costos de los roles",
+      "description": "Operaciones acerca de costos de los roles"
+    },
+    {
+      "name": "Costos de los proyectos",
+      "description": "Obtener costos de los proyectos"
+    }
+  ],
+  "paths": {
+    "/api/v1/finanzas/cargar-costo": {
+      "post": {
+        "tags": [
+          "Costos de los roles"
+        ],
+        "summary": "Cargar nuevos costos mensuales",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CostosMensualesRequestArr"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Operación exitosa, costos cargados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostosMensualesResponseArr"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request invalida, verifica que el anio y el mes sean correctos, que el costo sea mayor a 0 y que el rol no este cargado previamente"
+          },
+          "404": {
+            "description": "El nombre del rol y la experiencia son incorrectos"
+          }
+        }
+      }
+    },
+    "/api/v1/finanzas/actualizar-costos": {
+      "put": {
+        "tags": [
+          "Costos de los roles"
+        ],
+        "summary": "Actualizar todos los costos mensuales",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CostosMensualesPutRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Operación exitosa, costos actualizados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostosMensualesResponseArr"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request invalida, verifica que el costo sea mayor a 0"
+          },
+          "404": {
+            "description": "Request invalida, verifica que los id esten cargados previamente"
+          }
+        }
+      }
+    },
+    "/api/v1/finanzas/actualizar-costo/{id}": {
+      "put": {
+        "tags": [
+          "Costos de los roles"
+        ],
+        "summary": "Actualizar un costo mensual",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del costo mensual",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "costo": {
+                    "type": "integer",
+                    "example": 150
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Operación exitosa, costo actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostosMensualesResponseArr"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request invalida, verifica que el costo sea mayor a 0"
+          },
+          "404": {
+            "description": "Request invalida, verifica que el id este cargado previamente"
+          }
+        }
+      }
+    },
+    "/api/v1/finanzas/costos": {
+      "get": {
+        "tags": [
+          "Costos de los roles"
+        ],
+        "summary": "Obtener los costos mensuales",
+        "responses": {
+          "200": {
+            "description": "Operación exitosa, costos obtenidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostosMensualesResponseArr"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finanzas/costos/{id}": {
+      "get": {
+        "tags": [
+          "Costos de los roles"
+        ],
+        "summary": "Obtener un costo mensual",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID del costo mensual",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa, costo obtenido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostosMensualesResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request invalida, verifica que el id este cargado previamente"
+          }
+        }
+      }
+    },
+    "/api/v1/finanzas/proyectos/{anio}": {
+      "get": {
+        "tags": [
+          "Costos de los proyectos"
+        ],
+        "summary": "Obtener costos de los proyectos en un año",
+        "parameters": [
+          {
+            "name": "anio",
+            "in": "path",
+            "description": "Año de los proyectos",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-year",
+              "example": "2023"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa, costo obtenido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProyectosResponseObj"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "No se pudo conectar a las API externas, vuelve a intentarlo en unos minutos"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CostosMensualesRequest": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "example": "Desarrollador"
+          },
+          "experiencia": {
+            "type": "string",
+            "example": "Senior"
+          },
+          "costo": {
+            "type": "integer",
+            "example": 150
+          },
+          "anio": {
+            "type": "string",
+            "format": "date-year",
+            "example": "2023"
+          },
+          "mes": {
+            "type": "string",
+            "format": "date-month",
+            "example": "11"
+          }
+        }
+      },
+      "CostosMensualesRequestArr": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/CostosMensualesRequest"
+        }
+      },
+      "CostosMensualesPutRequest": {
+        "type": "object",
+        "properties": {
+          "1": {
+            "type": "object",
+            "properties": {
+              "costo": {
+                "type": "integer",
+                "example": 150
+              }
+            }
+          },
+          "2": {
+            "type": "object",
+            "properties": {
+              "costo": {
+                "type": "integer",
+                "example": 300
+              }
+            }
+          }
+        }
+      },
+      "CostosMensualesResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "rol": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "1f14a491-e26d-4092-86ea-d76f20c165d1"
+              },
+              "nombre": {
+                "type": "string",
+                "example": "Desarrollador"
+              },
+              "experiencia": {
+                "type": "string",
+                "example": "Senior"
+              }
+            }
+          },
+          "mes": {
+            "type": "string",
+            "format": "date-month"
+          },
+          "anio": {
+            "type": "string",
+            "format": "date-year"
+          },
+          "costo": {
+            "type": "integer",
+            "example": 150
+          }
+        }
+      },
+      "CostosMensualesResponseArr": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/CostosMensualesResponse"
+        }
+      },
+      "ProyectosResponse": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "nombreProyecto": {
+              "type": "string",
+              "example": "Sistema de Gestión de Inventarios"
+            },
+            "costoPorMes": {
+              "type": "object",
+              "example": {
+                "1": 3500,
+                "2": 5000,
+                "3": 0,
+                "4": 0,
+                "5": 0,
+                "6": 0,
+                "7": 0,
+                "8": 0,
+                "9": 0,
+                "10": 0,
+                "11": 0,
+                "12": 0
+              }
+            },
+            "costoTotal": {
+              "type": "integer",
+              "example": 8500
+            }
+          }
+        }
+      },
+      "ProyectosResponseObj": {
+        "type": "object",
+        "properties": {
+          "proyectos": {
+            "$ref": "#/components/schemas/ProyectosResponse"
+          },
+          "costoTotalGlobal": {
+            "type": "integer",
+            "example": 8500
+          }
+        }
+      }
+    }
+  }
+}
