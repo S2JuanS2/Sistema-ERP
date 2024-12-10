@@ -19,6 +19,7 @@ import fi.uba.memo1.apirest.finanzas.exception.CostoEncontradoException;
 import fi.uba.memo1.apirest.finanzas.model.CostosMensuales;
 import fi.uba.memo1.apirest.finanzas.repository.CostosMensualesRepository;
 import jakarta.transaction.Transactional;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -56,6 +57,7 @@ public class CostosMensualesService implements ICostosMensualesService {
 
     @Autowired
     @Qualifier("HorasWebClient")
+    @Setter
     private WebClient horasWebClient;
 
     private final CostosMensualesRepository repository;

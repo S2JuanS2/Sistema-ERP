@@ -1,7 +1,7 @@
 'use client';
 
 import { DataTable } from '@/components/ui/data-table';
-import { Mes } from '@/types/enums';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ColumnDef } from '@tanstack/react-table';
 import { Pencil } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -15,19 +15,14 @@ export type costosTableData = {
 
 type TableProps = {
   data: costosTableData[];
-  mes: string;
-  anio: string;
+  loading: boolean;
 };
 
-export default function Table({ data, mes, anio }: TableProps) {
+export default function Table({ data, loading }: TableProps) {
   const router = useRouter();
 
   function handleEditCosto(actual: costosTableData) {
-    router.push(
-      `/cargar-costo-rol?id=${actual.id}&rol=${actual.rol}&experiencia=${actual.seniority}&costo=${
-        actual.costo
-      }&mes=${Mes[mes as keyof typeof Mes]}&anio=${anio}`
-    );
+    router.push('/editar-costo-rol?id=' + actual.id);
   }
 
   const columns: ColumnDef<costosTableData>[] = [
@@ -48,7 +43,7 @@ export default function Table({ data, mes, anio }: TableProps) {
       header: 'Acciones',
       cell: ({ row }) => (
         <button onClick={() => handleEditCosto(row.original)}>
-          <div className="bg-slate-200 p-2 w-fit rounded flex items-center text-gray-600 hover:text-black transition-colors">
+          <div className="bg-slate-200 p-2 rounded flex items-center text-gray-600 hover:text-black transition-colors">
             <Pencil className="mr-2" size={20} />
             <p className="font-semibold ">Editar</p>
           </div>
@@ -56,6 +51,18 @@ export default function Table({ data, mes, anio }: TableProps) {
       ),
     },
   ];
+
+  if (loading) {
+    data.length = 5;
+    columns.forEach((column) => {
+      if (column.id === 'actions') {
+        column.cell = () => <Skeleton className="w-[80px] h-[20px] rounded-full bg-gray-300" />;
+        return;
+      }
+
+      column.cell = () => <Skeleton className="w-[200px] h-[20px] rounded-full bg-gray-300" />;
+    });
+  }
 
   return <DataTable columns={columns} data={data} />;
 }
