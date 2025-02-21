@@ -1,5 +1,5 @@
 <div align="center">
-   <h1>PSA-Squad7-TribuB</h1>
+   <h1>ERP</h1>
    <i>Módulo de finanzas de PSA</i>
    <br>
    <br>
